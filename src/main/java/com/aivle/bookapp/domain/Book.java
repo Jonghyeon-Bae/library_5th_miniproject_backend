@@ -24,6 +24,7 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "book")
 @Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @EntityListeners(AuditingEntityListener.class)
