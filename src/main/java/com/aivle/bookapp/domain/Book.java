@@ -1,65 +1,107 @@
 package com.aivle.bookapp.domain;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
+import java.time.LocalDateTime;
 
 @Entity
-// @Table(name="Book2")
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
+@EntityListeners(AuditingEntityListener.class)
 public class Book {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    
-    @Setter 
+
     @Column(nullable = false, length = 200)
     @NotBlank(message = "Title is required")
     private String title;
-    
-    @Setter 
-    @Column(nullable = false)
+
+    @Column(nullable = false, length = 255)
+    @NotBlank(message = "Contents is required")
+    private String contents;
+
+    @Column(nullable = false, length = 255)
     @NotBlank(message = "Author is required")
     private String author;
 
+    @Column(nullable = false, length = 255)
+    @NotBlank(message = "Publisher is required")
+    private String publisher;
 
+    @Column(length = 255)
+    private String thumbnail;
 
-    // public Book(Long id, String title, String author) {
-    //     this.id = id;
-    //     this.title = title;
-    //     this.author = author;
-    // }
+    @Column(nullable = false)
+    private Boolean isAvailable;
 
-    // public void setId (Long id){
-    //     this.id = id;
-    // }
+    @Column(nullable = false)
+    private Boolean bestbook;
 
-    // public void setTitle (String title){
-    //     this.title = title;
-    // }
+    @Column(nullable = false)
+    @NotNull(message = "user_id is required")
+    private Long userId;
 
-    // public void setAuthor (String author){
-    //     this.author = author;
-    // }
+    private Long borrowerId;
 
-    // public Long getId(){
-    //     return this.id;
-    // }
+    @Column(nullable = false)
+    @Min(value = 0, message = "like_count must be at least 0")
+    private int likeCount;
 
-    // public String getTitle(){
-    //     return this.title;
-    // }
+    @Column(length = 511)
+    private String aiReview;
 
-    // public String getAuthor(){
-    //     return this.author;
-    // }
+    private String isbn13;
+
+    @Column(length = 100)
+    private String category;
+
+    private int sales;
+
+    @CreatedDate
+    @Column(nullable = false, updatable = false)
+    private LocalDateTime created_at;
+
+    @LastModifiedDate
+    @Column(nullable = false)
+    private LocalDateTime updated_at;
+
+    public void updateBook(String title, String contents, String author,
+                           String publisher, String thumbnail, Boolean isAvailable,
+                           Boolean bestbook, Long borrowerId, String aiReview) {
+        this.title = title;
+        this.contents = contents;
+        this.author = author;
+        this.publisher = publisher;
+        this.thumbnail = thumbnail;
+        this.isAvailable = isAvailable;
+        this.bestbook = bestbook;
+        this.borrowerId = borrowerId;
+        this.aiReview = aiReview;
+    }
+
+    public void increaseLikeCount() {
+        this.likeCount++;
+    }
+
+    public void decreaseLikeCount() {
+        if (this.likeCount > 0) {
+            this.likeCount--;
+        }
+    }
+
+    public void setBorrower(Long borrowerId) {
+        this.borrowerId = borrowerId;
+        this.isAvailable = (borrowerId == null);
+    }
 }
