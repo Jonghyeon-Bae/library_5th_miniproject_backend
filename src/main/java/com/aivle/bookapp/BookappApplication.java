@@ -21,7 +21,8 @@ return args -> {
 	Book book3 = new Book();
 	Book book4 = new Book();
 	Book book5 = new Book();
-	
+	Book book6 = new Book();
+
 	book1.setTitle("오승헌의 직박구리 1");
 	book1.setAuthor("오승헌");
 	bookRepository.save(book1);
@@ -37,6 +38,10 @@ return args -> {
 	book5.setTitle("오승헌의 직박구리 5");
 	book5.setAuthor("오승헌");
 	bookRepository.save(book5);
+
+	book6.setTitle("오승헌의 직박구리 6");
+	book6.setAuthor("오승헌");
+	bookRepository.save(book6);
 
 // Book book = new Book();
 // book.setTitle("Spring boot 입문");

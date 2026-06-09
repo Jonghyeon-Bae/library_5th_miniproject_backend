@@ -36,7 +36,6 @@ public class Users {
     @Column(nullable = false)
     private String name;
 
-
     @Setter
     @Column
     private String avatar;

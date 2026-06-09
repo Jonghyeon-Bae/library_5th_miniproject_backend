@@ -8,6 +8,7 @@ import lombok.Setter;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import org.w3c.dom.Text;
 
 import java.time.LocalDateTime;
 
@@ -46,7 +47,7 @@ public class Book {
     //내용
     @Setter
     @Column(nullable = false)
-    private String contents;
+    private Text contents;
 
     @Setter
     @Column(nullable = false)
@@ -74,7 +75,7 @@ public class Book {
 
     @Setter
     @Column
-    private String ai_review;
+    private Text ai_review;
 
     @Setter
     @Column
@@ -99,33 +100,5 @@ public class Book {
     @LastModifiedDate
     @Column
     private LocalDateTime updated_at;
-    // public Book(Long id, String title, String author) {
-    //     this.id = id;
-    //     this.title = title;
-    //     this.author = author;
-    // }
 
-    // public void setId (Long id){
-    //     this.id = id;
-    // }
-
-    // public void setTitle (String title){
-    //     this.title = title;
-    // }
-
-    // public void setAuthor (String author){
-    //     this.author = author;
-    // }
-
-    // public Long getId(){
-    //     return this.id;
-    // }
-
-    // public String getTitle(){
-    //     return this.title;
-    // }
-
-    // public String getAuthor(){
-    //     return this.author;
-    // }
 }
