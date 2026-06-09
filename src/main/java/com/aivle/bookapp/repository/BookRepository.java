@@ -11,7 +11,7 @@ import com.aivle.bookapp.domain.Book;
 
 public interface BookRepository extends JpaRepository<Book, Long> {
 
-    // 등록된 도서 검색
+    // 등록된 도서 검색_
     Page<Book> findByTitleContainingIgnoreCaseOrAuthorContainingIgnoreCase(
             String titleKeyword,
             String authorKeyword,
