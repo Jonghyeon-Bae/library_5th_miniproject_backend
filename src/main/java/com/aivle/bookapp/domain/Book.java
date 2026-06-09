@@ -6,26 +6,27 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.w3c.dom.Text;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "book")
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-// @EntityListeners(AuditingEntityListener.class) //날짜 자동생성 -> 적용 되어있는걸로 확인됨.
+@EntityListeners(AuditingEntityListener.class)
 public class Book {
 
 
@@ -52,63 +53,81 @@ public class Book {
     @Column(nullable = false)
     private String title;
 
-    // 저자
-    @Setter
-    @Column(nullable = false)
+    @Column(nullable = false, length = 255)
+    @NotBlank(message = "Contents is required")
+    private String contents;
+
+    @Column(nullable = false, length = 255)
+    @NotBlank(message = "Author is required")
     private String author;
-    // 출판사
-    @Setter
-    @Column(nullable = false)
+
+    @Column(nullable = false, length = 255)
+    @NotBlank(message = "Publisher is required")
     private String publisher;
 
-    //내용
-    @Setter
-    @Column(nullable = false)
-    private Text contents;
-    // 표지
-    @Setter
-    @Column
+    @Column(length = 255)
     private String thumbnail;
-    //대여 가능 여부
-    @Setter
-    @Column
-    private Boolean is_available;
-    // 베스트셀러 여부
-    @Setter
-    @Column
+
+    @Column(nullable = false)
+    private Boolean isAvailable;
+
+    @Column(nullable = false)
     private Boolean bestbook;
 
-    // 쪼아요
-    @Setter
-    @Column
-    private Integer like_count;
-    // AI Review
-    @Setter
-    @Column
-    private Text ai_review;
-    // ISBN
-    @Setter
-    @Column
-    private String isbn13;
-    // 카테고리
-    @Setter
-    @Column
-    private String category;
-    // 판매량
-    @Setter
-    @Column
-    private Integer sales;
+    @Column(nullable = false)
+    @NotNull(message = "user_id is required")
+    private Long userId;
 
-    // 생성될 때 시간 자동 입력  업데이트
-    @Setter
+    private Long borrowerId;
+
+    @Column(nullable = false)
+    @Min(value = 0, message = "like_count must be at least 0")
+    private int likeCount;
+
+    @Column(length = 511)
+    private String aiReview;
+
+    private String isbn13;
+
+    @Column(length = 100)
+    private String category;
+
+    private int sales;
+
     @CreatedDate
-    @Column(updatable = false)
+    @Column(nullable = false, updatable = false)
     private LocalDateTime created_at;
 
-    // 수정될 때마다 시간 자동 변경
-    @Setter
     @LastModifiedDate
-    @Column
+    @Column(nullable = false)
     private LocalDateTime updated_at;
 
+    public void updateBook(String title, String contents, String author,
+                           String publisher, String thumbnail, Boolean isAvailable,
+                           Boolean bestbook, Long borrowerId, String aiReview) {
+        this.title = title;
+        this.contents = contents;
+        this.author = author;
+        this.publisher = publisher;
+        this.thumbnail = thumbnail;
+        this.isAvailable = isAvailable;
+        this.bestbook = bestbook;
+        this.borrowerId = borrowerId;
+        this.aiReview = aiReview;
+    }
+
+    public void increaseLikeCount() {
+        this.likeCount++;
+    }
+
+    public void decreaseLikeCount() {
+        if (this.likeCount > 0) {
+            this.likeCount--;
+        }
+    }
+
+    public void setBorrower(Long borrowerId) {
+        this.borrowerId = borrowerId;
+        this.isAvailable = (borrowerId == null);
+    }
 }
