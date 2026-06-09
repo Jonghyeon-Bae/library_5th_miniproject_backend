@@ -1,65 +1,122 @@
 package com.aivle.bookapp.domain;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import java.time.LocalDateTime;
+
+import jakarta.persistence.*;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
+import lombok.Setter;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
 
 @Entity
-// @Table(name="Book2")
+@Table(name = "books")
 @Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@EntityListeners(AuditingEntityListener.class)
 public class Book {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    
-    @Setter 
+
+    //외래키 설정 1:M 관계, 책 등록자는 Not null
+    @Setter
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private Users user;
+
+    //외래키 설정, 1:M 관계, 대여자는 Null 허용
+    @Setter
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "borrower_id")
+    private Users borrower;
+
     @Column(nullable = false, length = 200)
     @NotBlank(message = "Title is required")
     private String title;
-    
-    @Setter 
-    @Column(nullable = false)
+
+    @Column(nullable = false, length = 255)
     @NotBlank(message = "Author is required")
     private String author;
 
+    @Column(nullable = false, length = 255)
+    @NotBlank(message = "Contents is required")
+    private String contents;
 
+    @Column(nullable = false, length = 255)
+    @NotBlank(message = "Publisher is required")
+    private String publisher;
 
-    // public Book(Long id, String title, String author) {
-    //     this.id = id;
-    //     this.title = title;
-    //     this.author = author;
-    // }
+    @Column(length = 255)
+    private String thumbnail;
 
-    // public void setId (Long id){
-    //     this.id = id;
-    // }
+    @Column(nullable = false)
+    private Boolean is_available;
 
-    // public void setTitle (String title){
-    //     this.title = title;
-    // }
+    @Column(nullable = false)
+    private Boolean bestbook;
 
-    // public void setAuthor (String author){
-    //     this.author = author;
-    // }
+    @Column(nullable = false)
+    @Min(value = 0, message = "like_count must be at least 0")
+    private int like_count;
 
-    // public Long getId(){
-    //     return this.id;
-    // }
+    @Column(length = 511)
+    private String ai_review;
 
-    // public String getTitle(){
-    //     return this.title;
-    // }
+    private String isbn13;
 
-    // public String getAuthor(){
-    //     return this.author;
-    // }
+    @Column(length = 100)
+    private String category;
+
+    private int sales;
+
+    @CreatedDate
+    @Column(nullable = false, updatable = false)
+    private LocalDateTime created_at;
+
+    @LastModifiedDate
+    @Column(nullable = false)
+    private LocalDateTime updated_at;
+
+    public void increaseLikeCount() {
+        this.like_count++;
+    }
+
+    public void decreaseLikeCount() {
+        if (this.like_count > 0) {
+            this.like_count--;
+        }
+    }
+
+    // 대출 처리 메서드
+    public void borrowBook(Users borrower) {
+        this.is_available = false;
+        this.borrower = borrower;
+    }
+    // 반납 처리 메서드
+    public void returnBook() {
+        this.is_available = true;
+        this.borrower = null;
+    }
+
+    public void updateBook(String title, String contents, String author,
+                           String publisher, String thumbnail, Boolean is_available,
+                           Boolean bestbook, String ai_review) {
+        this.title = title;
+        this.contents = contents;
+        this.author = author;
+        this.publisher = publisher;
+        this.thumbnail = thumbnail;
+        this.is_available = is_available;
+        this.bestbook = bestbook;
+        this.ai_review = ai_review;
+    }
 }
