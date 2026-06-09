@@ -29,14 +29,16 @@ public class BookController {
     // private final BookRepository bookRepository;
     private final BookService bookService;
 
+
+    //[소한민] Response Entity 사용하여 명시적인 200 OK 반환/ 응답규격 통일
     @GetMapping("/books/{id}")
-    public Book getBook(@PathVariable("id") Long id){
-        return bookService.findById(id);
+    public ResponseEntity<Book> getBook(@PathVariable("id") Long id){
+        return ResponseEntity.ok(bookService.findById(id));
     }
 
     @GetMapping("/books")
-    public List<Book> getAll(){
-        return bookService.findAll();
+    public ResponseEntity<List<Book>> getAll(){
+        return ResponseEntity.ok(bookService.findAll());
     }
 
     // @DeleteMapping("/books/{id}")
@@ -45,55 +47,58 @@ public class BookController {
     // }
 
     @GetMapping("/books/count")
-    public String getCount() {
-        return bookService.getCount();
+    public ResponseEntity<String> getCount() {
+        return ResponseEntity.ok(bookService.getCount());
     }
 
     @GetMapping("/books/search/title")
-    public List<Book> searchByTitle(@RequestParam("title") String title){
-        return bookService.searchByTitle(title);
+    public ResponseEntity<List<Book>> searchByTitle(@RequestParam("title") String title) {
+        return ResponseEntity.ok(bookService.searchByTitle(title));
     }
 
     @GetMapping("/books/search/author")
-    public List<Book> searchByAuthor(@RequestParam("author") String author){
-        return bookService.searchByAuthor(author);
+    public ResponseEntity<List<Book>> searchByAuthor(@RequestParam("author") String author) {
+        return ResponseEntity.ok(bookService.searchByAuthor(author));
     }
+
     @GetMapping("/books/search")
-    public List<Book> searchByTitleContaining(@RequestParam("keyword") String keyword){
-        return bookService.searchByTitleContaining(keyword);
+    public ResponseEntity<List<Book>> searchByTitleContaining(@RequestParam("keyword") String keyword) {
+        return ResponseEntity.ok(bookService.searchByTitleContaining(keyword));
     }
+
     @GetMapping("/books/search/detail")
-    public List<Book> searchByTitleAndAuthor(@RequestParam("title") String title, @RequestParam("author") String author){
-        return bookService.searchByTitleAndAuthor(title, author);
+    public ResponseEntity<List<Book>> searchByTitleAndAuthor(@RequestParam("title") String title, @RequestParam("author") String author) {
+        return ResponseEntity.ok(bookService.searchByTitleAndAuthor(title, author));
     }
 
     @GetMapping("/books/search/author/title")
-    public List<String> authorGetTitle(@RequestParam("author") String author){
-        return bookService.authorGetTitle(author);
+    public ResponseEntity<List<String>> authorGetTitle(@RequestParam("author") String author) {
+        return ResponseEntity.ok(bookService.authorGetTitle(author));
     }
 
     @GetMapping("/books/page")
-    public Page<Book> getPage(@RequestParam("page") int page, @RequestParam("size") int size,@RequestParam("sortBy") String sortBy){
-        return bookService.getPage(page,size,sortBy);
+    public ResponseEntity<Page<Book>> getPage(@RequestParam("page") int page, @RequestParam("size") int size, @RequestParam("sortBy") String sortBy) {
+        return ResponseEntity.ok(bookService.getPage(page, size, sortBy));
     }
 
+    // [소한민] @Valid를 통한 데이터 검증 강화
     @PostMapping("/books")
     public ResponseEntity<Book> createBook(@Valid @RequestBody Book book) {
-        Book saved =  bookService.createBook(book);
-
+        Book saved = bookService.createBook(book);
         return ResponseEntity.status(HttpStatus.CREATED).body(saved);
     }
 
+    // [소한민] 업데이트 로직에도 @Valid 추가하여 데이터 정합성 보장
     @PatchMapping("/books/{id}")
-    public ResponseEntity<Book> updateBook(@PathVariable("id") Long id,@RequestBody Book book) {
-        Book updated =  bookService.updateBook(id,book);
-
-        return ResponseEntity.status(HttpStatus.OK).body(updated);
+    public ResponseEntity<Book> updateBook(@PathVariable("id") Long id, @Valid @RequestBody Book book) {
+        Book updated = bookService.updateBook(id, book);
+        return ResponseEntity.ok(updated);
     }
-    @DeleteMapping("/books/{id}")
-    public ResponseEntity<Book> deleteBook(@PathVariable("id") Long id){
-        Book deleted = bookService.deleteBook(id); 
 
-        return ResponseEntity.status(HttpStatus.OK).body(deleted);
+    // [소한민] 삭제 성공 시 본문이 없는 204 No Content 반환 (REST 표준 준수)
+    @DeleteMapping("/books/{id}")
+    public ResponseEntity<Void> deleteBook(@PathVariable("id") Long id) {
+        bookService.deleteBook(id);
+        return ResponseEntity.noContent().build();
     }
 }
