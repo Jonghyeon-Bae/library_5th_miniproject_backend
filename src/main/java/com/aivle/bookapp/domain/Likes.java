@@ -9,7 +9,7 @@ import lombok.Setter;
 @Entity
 @Getter
 @Setter
-@Table(name="LIKES")
+@Table(name="likes")
 @NoArgsConstructor
 @AllArgsConstructor
 public class Likes {
