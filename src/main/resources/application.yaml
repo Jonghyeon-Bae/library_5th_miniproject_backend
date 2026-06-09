@@ -4,6 +4,8 @@ server:
 spring:
   application:
     name: bookapp
+  config:
+    import: optional:file:.env[.properties]
 
   # [개발용 H2 설정] (현재 활성화 상태)
   # datasource:
