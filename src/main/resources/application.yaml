@@ -22,7 +22,7 @@ spring:
   #     ddl-auto: create
   #   show-sql: true
 
-  # [배포 및 Aiven MySQL 설정] (Aiven이 Running이 되면 아래 주석을 풀고 위의 H2 설정을 주석처리하세요)
+  # [배포 및 Aiven MySQL 설정] (Aiven이 Running이 되면 아래 주석을 풀고 위의 H2 설정을 주석처리하세요.)
   datasource:
     driver-class-name: ${MYSQL_DRIVER_CLASS_NAME}
     url: ${MYSQL_URL}
