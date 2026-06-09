@@ -16,29 +16,16 @@ public class BookappApplication {
 @Bean
 CommandLineRunner init(BookRepository bookRepository) {
 return args -> {
-
+    /* 기존 H2용 더미 데이터 생성 주석 처리 (MySQL 외래키 제약조건 방지)
 	Book book1 = new Book();
-
-
 	book1.setTitle("오승헌의 직박구리 1");
 	book1.setAuthor("오승헌");
+	book1.setContents("직박구리 내용 1");
+	book1.setPublisher("오승헌 출판사");
+	book1.setIs_available(true);
+	book1.setBestbook(false);
 	bookRepository.save(book1);
-
-
-// Book book = new Book();
-// book.setTitle("Spring boot 입문");
-// book.setAuthor("임한울");
-
-// Book saved = bookRepository.save(book);
-
-// System.out.println("책 id: " + saved.getId());
-
-// Book book2 = bookRepository.findById(1L).orElseThrow(() -> new RuntimeException("책이 없음"));
-
-// System.out.println("-------------------");
-// System.out.println("book2의 id: " + book2.getId());
-// System.out.println("book2의 title: " + book2.getTitle());
-// System.out.println("book2의 author: " + book2.getAuthor());
+    */
 };
 }
 
