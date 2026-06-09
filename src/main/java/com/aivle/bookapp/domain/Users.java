@@ -1,70 +1,82 @@
 package com.aivle.bookapp.domain;
 
-
-import java.time.LocalDateTime;
-
+import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EntityListeners;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import java.time.LocalDateTime;
 
 @Entity
 @Getter
-@Table(name="users")
+@Table(name="USERS")
 @NoArgsConstructor
 @AllArgsConstructor
 @EntityListeners(AuditingEntityListener.class)
 public class Users {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Setter
-    @Column(nullable = false)
+    @Column(unique = true, nullable = false)
+    @NotBlank(message = "Email is required")
     private String email;
 
-    @Setter
     @Column(nullable = false)
+    @NotBlank(message = "Password is required")
     private String password;
 
-    @Setter
     @Column(nullable = false)
     private String name;
 
-    @Setter
-    @Column
     private String avatar;
 
-    @Setter
-    @Column
-    private Boolean email_visibility;
+    @Column(nullable = false)
+    private Boolean email_visibility = false;
 
-    @Setter
-    @Column
-    private Boolean verified;
+    @Column(nullable = false)
+    private Boolean verified = false;
 
-    //CreatedDate : 생성될 때 시간 자동 입력  업데이트,
-    @Setter
     @CreatedDate
-    @Column(updatable = false)
+    @Column(nullable = false, updatable = false)
     private LocalDateTime created_at;
 
-    //LastModifiedDate : 수정될 때마다 시간 자동 변경
-    @Setter
     @LastModifiedDate
-    @Column
+    @Column(nullable = false)
     private LocalDateTime updated_at;
 
+    public Users(String email, String password, String name, String avatar) {
+        this.email = email;
+        this.password = password;
+        this.name = name;
+        this.avatar = avatar;
+        this.email_visibility = false;
+        this.verified = false;
+    }
+
+    public void updateProfile(String name, String avatar, Boolean email_visibility) {
+        if (name != null) this.name = name;
+        if (avatar != null) this.avatar = avatar;
+        if (email_visibility != null) this.email_visibility = email_visibility;
+    }
+
+    public void changePassword(String newPassword) {
+        this.password = newPassword;
+    }
+
+    public void changeVerified() {
+        this.verified = true;
+    }
+
+    public void updateAvatar(String avatarUrl) {
+        this.avatar = avatarUrl;
+    }
+
+    public void changeEmailVisibility() {
+        this.email_visibility = !this.email_visibility;
+    }
 }
