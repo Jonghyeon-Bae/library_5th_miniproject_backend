@@ -23,4 +23,10 @@ public class GlobalExceptionHandler {
         Map<String,String>body = Map.of("error","Validation Failed!","message",msg);
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
     }
+
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<Map<String, String>> handleRuntimeException(RuntimeException ex) {
+        Map<String, String> body = Map.of("error", "Bad Request", "message", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
+    }
 }
