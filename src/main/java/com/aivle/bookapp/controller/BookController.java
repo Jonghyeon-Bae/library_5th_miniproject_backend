@@ -11,7 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import com.aivle.bookapp.domain.Books;
+import com.aivle.bookapp.domain.Book;
 // import com.aivle.bookapp.repository.BookRepository;
 import com.aivle.bookapp.service.BookService;
 
@@ -31,7 +31,7 @@ public class BookController {
 
     //[소한민] Response Entity 사용하여 명시적인 200 OK 반환/ 응답규격 통일
     @GetMapping("/{id}")
-    public ResponseEntity<Books> getBook(@PathVariable("id") Long id){
+    public ResponseEntity<Book> getBook(@PathVariable("id") Long id){
         return ResponseEntity.ok(bookService.findById(id));
     }
 
@@ -43,7 +43,7 @@ public class BookController {
             @RequestParam(name = "keyword", required = false) String keyword) {
 
         // 1. Service에서 Page<Book> 엔티티 결과를 가져옴
-        Page<Books> bookPage = bookService.getPage(page, size, "createdAt");
+        Page<Book> bookPage = bookService.getPage(page, size, "createdAt");
 
         // 2. Page<Book> 엔티티 내부의 내용물들을 BookResponseDto로 싹 변환 (.map 활용)
         Page<BookResponseDto> dtoPage = bookPage.map(book -> new BookResponseDto(book));
@@ -97,8 +97,8 @@ public class BookController {
 
     // [소한민] 신규 도서 등록 Location header 및 body 반영
     @PostMapping
-    public ResponseEntity<Map<String, Object>> createBook(@Valid @RequestBody Books book) {
-        Books saved = bookService.createBook(book);
+    public ResponseEntity<Map<String, Object>> createBook(@Valid @RequestBody Book book) {
+        Book saved = bookService.createBook(book);
 
         // Location 헤더 생성
         URI location = ServletUriComponentsBuilder.fromCurrentRequest()
@@ -116,8 +116,8 @@ public class BookController {
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<Books> updateBook(@PathVariable("id") Long id, @RequestBody Books book) {
-        Books updated = bookService.updateBook(id, book);
+    public ResponseEntity<Book> updateBook(@PathVariable("id") Long id, @RequestBody Book book) {
+        Book updated = bookService.updateBook(id, book);
         return ResponseEntity.ok(updated);
     }
 
