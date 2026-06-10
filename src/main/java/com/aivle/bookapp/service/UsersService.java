@@ -28,14 +28,14 @@ public class UsersService {
         return usersRepository.findAll();
     }
 
-    // 회원가입
-    @Transactional
-    public User createUser(User user){
-        if(usersRepository.existsByEmail(user.getEmail())){
-            throw new RuntimeException("이미 존재하는 이메일입니다.");
-        }
-        return usersRepository.save(user);
-    }
+    // // 회원가입
+    // @Transactional
+    // public User createUser(User user){
+    //     if(usersRepository.existsByEmail(user.getEmail())){
+    //         throw new RuntimeException("이미 존재하는 이메일입니다.");
+    //     }
+    //     return usersRepository.save(user);
+    // }
 
     // 이메일로 회원 찾기
     @Transactional(readOnly = true)

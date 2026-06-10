@@ -26,7 +26,10 @@ public class SearchHistoryService {
     public SearchHistory createSearchHistory(Long userId, String keyword) {
         User user = usersRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("User not found: " + userId));
-        
+
+        // 동일 키워드 있을 경우 삭제
+        searchHistoryRepository.deleteByUserIdAndKeyword(userId, keyword);
+
         SearchHistory searchHistory = SearchHistory.builder()
                 .user(user)
                 .keyword(keyword)
