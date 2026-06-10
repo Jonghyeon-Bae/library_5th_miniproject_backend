@@ -75,7 +75,7 @@ public class BookController {
     // 인기 도서 TOP 10 랭킹 API
     @GetMapping("/ranking")
     public ResponseEntity<List<BookResponseDto>> getRanking() {
-        List<Book> books = bookService.getTop10PopularBooks();
+        List<Book> books = bookService.getPopularBooks();
         List<BookResponseDto> dtos = books.stream().map(BookResponseDto::new).toList();
         return ResponseEntity.ok(dtos);
     }
@@ -161,10 +161,8 @@ public class BookController {
             @RequestBody Map<String, String> request) {
 
         String coverDataUrl = request.get("coverDataUrl");
-        // TODO: Service에 표지 이미지만 업데이트하는 로직 추가 필요
-        // bookService.updateCover(id, coverDataUrl);
+        Book updated = bookService.updateCover(id, coverDataUrl);
 
-        // 예시 응답
-        return ResponseEntity.ok(Map.of("id", id, "thumbnail", coverDataUrl));
+        return ResponseEntity.ok(Map.of("id", updated.getId(), "thumbnail", updated.getThumbnail()));
     }
 }
