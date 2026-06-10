@@ -34,4 +34,24 @@ public class SearchHistoryService {
                 
         return searchHistoryRepository.save(searchHistory);
     }
+
+    // 특정 사용자의 전체 검색 기록 조회
+    public List<SearchHistory> findAllHistory(Long userId) {
+        return searchHistoryRepository
+                .findAllByUserIdOrderByCreatedAtDesc(userId);
+    }
+
+    // 특정 사용자의 검색 기록 전체 삭제
+    @Transactional
+    public void deleteAllHistory(Long userId) {
+
+        usersRepository.findById(userId)
+                .orElseThrow(() ->
+                        new IllegalArgumentException(
+                                "User not found: " + userId
+                        )
+                );
+
+        searchHistoryRepository.deleteAllByUserId(userId);
+    }
 }

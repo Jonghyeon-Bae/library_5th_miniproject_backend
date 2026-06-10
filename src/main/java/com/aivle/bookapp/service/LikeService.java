@@ -99,4 +99,30 @@ public class LikeService {
                 .map(Like::getBook)
                 .toList();
     }
+
+    // 특정 도서 좋아요 개수 조회
+    @Transactional(readOnly = true)
+    public long getLikeCount(Long bookId) {
+
+        bookRepository.findById(bookId)
+                .orElseThrow(() -> new BookNotFoundException(bookId));
+
+        return likeRepository.countByBookId(bookId);
+    }
+
+    // 특정 사용자의 특정 도서 좋아요 취소
+    @Transactional
+    public void cancelLike(Long bookId, Long userId) {
+
+        if (!likeRepository.existsByBookIdAndUserId(bookId, userId)) {
+            throw new RuntimeException("좋아요 기록이 존재하지 않습니다.");
+        }
+
+        Book book = bookRepository.findById(bookId)
+                .orElseThrow(() -> new BookNotFoundException(bookId));
+
+        likeRepository.deleteByBookIdAndUserId(bookId, userId);
+
+        book.decreaseLikeCount();
+    }
 }

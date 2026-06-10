@@ -129,4 +129,47 @@ public class UsersService {
 
         return String.valueOf(usersRepository.count());
     }
+
+    // 이메일 중복 여부 확인
+    @Transactional(readOnly = true)
+    public boolean existsByEmail(String email){
+        return usersRepository.existsByEmail(email);
+    }
+
+    // 이메일 인증 여부 조회
+    @Transactional(readOnly = true)
+    public boolean isVerified(Long userId){
+
+        User user = findById(userId);
+
+        return Boolean.TRUE.equals(user.getVerified());
+    }
+
+    // 이메일 공개 여부 조회
+    @Transactional(readOnly = true)
+    public boolean getEmailVisibility(Long userId){
+
+        User user = findById(userId);
+
+        return Boolean.TRUE.equals(
+                user.getEmailVisibility()
+        );
+    }
+
+    // 회원 존재 여부 확인
+    @Transactional(readOnly = true)
+    public boolean existsById(Long userId){
+        return usersRepository.existsById(userId);
+    }
+
+    // 이메일로 회원 삭제
+    @Transactional
+    public User deleteUserByEmail(String email){
+
+        User user = findByEmail(email);
+
+        usersRepository.delete(user);
+
+        return user;
+    }
 }
