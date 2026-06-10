@@ -142,8 +142,8 @@ public class BookController {
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<Book> updateBook(@PathVariable("id") Long id, @RequestBody Book book) {
-        Book updated = bookService.updateBook(id, book);
+    public ResponseEntity<Book> updateBook(@PathVariable("id") Long id, @RequestBody Map<String, Object> payload) {
+        Book updated = bookService.updateBook(id, payload);
         return ResponseEntity.ok(updated);
     }
 

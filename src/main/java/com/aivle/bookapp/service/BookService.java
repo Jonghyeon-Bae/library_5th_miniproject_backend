@@ -12,14 +12,17 @@ import org.springframework.transaction.annotation.Transactional;
 import com.aivle.bookapp.domain.Book;
 import com.aivle.bookapp.exception.BookNotFoundException;
 import com.aivle.bookapp.repository.BookRepository;
+import com.aivle.bookapp.repository.UsersRepository;
 
 import lombok.RequiredArgsConstructor;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
 public class BookService {
 
     private final BookRepository bookRepository;
+    private final UsersRepository usersRepository;
 
     // 책(ID)를 통한 책 조회
     @Transactional(readOnly = true)
@@ -93,14 +96,63 @@ public class BookService {
 
     // 책 수정
     @Transactional
-    public Book updateBook(Long id, Book book) {
+    public Book updateBook(Long id, Map<String, Object> payload) {
         Book existBook = findById(id);
-        if (book.getTitle() != null) {
-            existBook.updateBookInfo(book.getTitle(), null, null, null, null, null, null, null);
+
+        if (payload.containsKey("title")) {
+            existBook.updateBookInfo((String) payload.get("title"), null, null, null, null, null, null, null);
         }
-        if (book.getAuthor() != null) {
-            existBook.updateBookInfo(null, null, book.getAuthor(), null, null, null, null, null);
+        if (payload.containsKey("contents")) {
+            existBook.updateBookInfo(null, (String) payload.get("contents"), null, null, null, null, null, null);
         }
+        if (payload.containsKey("author")) {
+            existBook.updateBookInfo(null, null, (String) payload.get("author"), null, null, null, null, null);
+        }
+        if (payload.containsKey("publisher")) {
+            existBook.updateBookInfo(null, null, null, (String) payload.get("publisher"), null, null, null, null);
+        }
+        if (payload.containsKey("thumbnail")) {
+            existBook.updateBookInfo(null, null, null, null, (String) payload.get("thumbnail"), null, null, null);
+        }
+        if (payload.containsKey("bestbook")) {
+            existBook.updateBookInfo(null, null, null, null, null, null, (Boolean) payload.get("bestbook"), null);
+        }
+        if (payload.containsKey("aiReview") || payload.containsKey("ai_review")) {
+            String review = (String) (payload.containsKey("aiReview") ? payload.get("aiReview") : payload.get("ai_review"));
+            existBook.updateBookInfo(null, null, null, null, null, null, null, review);
+        }
+
+        // 대출/반납 상태 처리
+        if (payload.containsKey("isAvailable") || payload.containsKey("is_available")) {
+            Boolean isAvailable = (Boolean) (payload.containsKey("isAvailable") ? payload.get("isAvailable") : payload.get("is_available"));
+            Object borrowerIdObj = payload.containsKey("borrower_id") ? payload.get("borrower_id") : payload.get("borrowerId");
+
+            if (isAvailable != null) {
+                if (isAvailable) {
+                    existBook.returnBook();
+                } else {
+                    if (borrowerIdObj != null) {
+                        Long borrowerId = null;
+                        if (borrowerIdObj instanceof Number) {
+                            borrowerId = ((Number) borrowerIdObj).longValue();
+                        } else if (borrowerIdObj instanceof String) {
+                            borrowerId = Long.parseLong((String) borrowerIdObj);
+                        }
+                        
+                        if (borrowerId != null) {
+                            com.aivle.bookapp.domain.User borrower = usersRepository.findById(borrowerId)
+                                    .orElseThrow(() -> new IllegalArgumentException("User not found: " + borrowerIdObj));
+                            existBook.borrowBook(borrower);
+                        } else {
+                            existBook.returnBook();
+                        }
+                    } else {
+                        existBook.returnBook();
+                    }
+                }
+            }
+        }
+
         return bookRepository.save(existBook);
     }
 
