@@ -9,17 +9,17 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import com.aivle.bookapp.domain.Books;
+import com.aivle.bookapp.domain.Book;
 
-public interface BookRepository extends JpaRepository<Books, Long> {
+public interface BookRepository extends JpaRepository<Book, Long> {
 
-    List<Books> findByTitle(String title);
-    List<Books> findByAuthor(String author);
-    List<Books> findByTitleContaining(String keyword);
-    List<Books> findByTitleAndAuthor(String title, String author);
+    List<Book> findByTitle(String title);
+    List<Book> findByAuthor(String author);
+    List<Book> findByTitleContaining(String keyword);
+    List<Book> findByTitleAndAuthor(String title, String author);
 
     // 등록된 도서 검색
-    Page<Books> findByTitleContainingIgnoreCaseOrAuthorContainingIgnoreCase(
+    Page<Book> findByTitleContainingIgnoreCaseOrAuthorContainingIgnoreCase(
             String titleKeyword,
             String authorKeyword,
             Pageable pageable
@@ -29,29 +29,29 @@ public interface BookRepository extends JpaRepository<Books, Long> {
     boolean existsByIsbn13(String isbn13);
 
     // ISBN13을 기준으로 등록된 도서 조회
-    Optional<Books> findByIsbn13(String isbn13);
+    Optional<Book> findByIsbn13(String isbn13);
 
     // 마이페이지: 내가 등록한 책
-    Page<Books> findByUser_Id(Long userId, Pageable pageable);
+    Page<Book> findByUser_Id(Long userId, Pageable pageable);
 
     // 마이페이지: 내가 등록한 책의 개수 조회
     long countByUser_Id(Long userId);
 
     // 마이페이지: 내가 대출한 책
-    Page<Books> findByBorrower_Id(Long borrowerId, Pageable pageable);
+    Page<Book> findByBorrower_Id(Long borrowerId, Pageable pageable);
 
     // 마이페이지: 내가 대출한 책의 개수 조회
     long countByBorrower_Id(Long borrowerId);
 
     // 강력 추천 도서 조회
-    Page<Books> findByBestbookTrue(Pageable pageable);
+    Page<Book> findByBestbookTrue(Pageable pageable);
 
     // 좌측 배너 인기 도서 TOP 10
-    default List<Books> findTop10PopularBooks() {
+    default List<Book> findTop10PopularBooks() {
         return findAll()
                 .stream()
                 .sorted(
-                        Comparator.comparingInt(Books::getLikeCount)
+                        Comparator.comparingInt(Book::getLikeCount)
                                 .reversed()
                 )
                 .limit(10)
@@ -62,7 +62,7 @@ public interface BookRepository extends JpaRepository<Books, Long> {
     default long countAvailableBooks() {
         return findAll()
                 .stream()
-                .filter(books -> Boolean.TRUE.equals(books.getIsAvailable()))
+                .filter(book -> Boolean.TRUE.equals(book.getIsAvailable()))
                 .count();
     }
 
@@ -70,7 +70,7 @@ public interface BookRepository extends JpaRepository<Books, Long> {
     default long countBorrowedBooks() {
         return findAll()
                 .stream()
-                .filter(books -> Boolean.FALSE.equals(books.getIsAvailable()))
+                .filter(book -> Boolean.FALSE.equals(book.getIsAvailable()))
                 .count();
     }
 }

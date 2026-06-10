@@ -2,7 +2,7 @@ package com.aivle.bookapp.service;
 
 import java.util.List;
 
-import com.aivle.bookapp.domain.Users;
+import com.aivle.bookapp.domain.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -10,7 +10,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.aivle.bookapp.domain.Books;
+import com.aivle.bookapp.domain.Book;
 import com.aivle.bookapp.exception.BookNotFoundException;
 import com.aivle.bookapp.repository.BookRepository;
 
@@ -24,84 +24,84 @@ public class BookService {
 
     // 책(ID)를 통한 책 조회
     @Transactional(readOnly = true)
-    public Books findById(Long id) {
+    public Book findById(Long id) {
         return bookRepository.findById(id).orElseThrow(() -> new BookNotFoundException(id));
-
     }
 
     // 모든 책 조회
     @Transactional(readOnly = true)
-    public List<Books> findAll() {
+    public List<Book> findAll() {
         return bookRepository.findAll();
     }
-
-    // public String deleteBook(Long id){
-    //     if (bookRepository.existsById(id)){
-    //         bookRepository.deleteById(id);
-    //         return "Delete Success : "+id;
-    //     }throw new RuntimeException("Book not Found : "+id);
-    // }
 
     // 책 개수 조회
     @Transactional(readOnly = true)
     public String getCount() {
         return String.valueOf(bookRepository.count());
     }
+
     // 책 제목 조회
     @Transactional(readOnly = true)
-    public List<Books> searchByTitle(String title) {
+    public List<Book> searchByTitle(String title) {
         return bookRepository.findByTitle(title);
     }
+
     // 책 저자 조회
     @Transactional(readOnly = true)
-    public List<Books> searchByAuthor(String author) {
+    public List<Book> searchByAuthor(String author) {
         return bookRepository.findByAuthor(author);
     }
+
     // 키워드를 통한 책 제목조회
     @Transactional(readOnly = true)
-    public List<Books> searchByTitleContaining(String keyword) {
+    public List<Book> searchByTitleContaining(String keyword) {
         return bookRepository.findByTitleContaining(keyword);
     }
+
     // 책 제목과 저자 동시 조회
     @Transactional(readOnly = true)
-    public List<Books> searchByTitleAndAuthor(String title, String author) {
+    public List<Book> searchByTitleAndAuthor(String title, String author) {
         return bookRepository.findByTitleAndAuthor(title, author);
     }
+
     // 특정 작가의 도서 제목 목록 조회
     @Transactional(readOnly = true)
     public List<String> authorGetTitle(String author) {
-        List<Books> books = bookRepository.findByAuthor(author);
+        List<Book> books = bookRepository.findByAuthor(author);
         return books.stream().map(b -> b.getTitle()).toList();
     }
+
     // 정렬 기준(오름차순)으로 도서 목록을 페이징 처리하여 반환
     @Transactional(readOnly = true)
-    public Page<Books> getPage(int page, int size, String sortBy) {
+    public Page<Book> getPage(int page, int size, String sortBy) {
         Sort sort = Sort.by(sortBy).ascending();
         Pageable pageable = PageRequest.of(page, size, sort);
         return bookRepository.findAll(pageable);
     }
+
     // 책 생성
     @Transactional
-    public Books createBook(Books book) {
+    public Book createBook(Book book) {
         return bookRepository.save(book);
     }
 
     // 책 수정
     @Transactional
-    public Books updateBook(Long id, Books book) {
-        Books existBook = findById(id);
+    public Book updateBook(Long id, Book book) {
+        Book existBook = findById(id);
         if (book.getTitle() != null) {
-            existBook.setTitle(book.getTitle());
+            existBook.updateBookInfo(book.getTitle(), null, null, null, null, null, null, null);
         }
         if (book.getAuthor() != null) {
-            existBook.setAuthor(book.getAuthor());
+            existBook.updateBookInfo(null, null, book.getAuthor(), null, null, null, null, null);
         }
         return bookRepository.save(existBook);
     }
+
     // 책 삭제
     @Transactional
-    public Books deleteBook(Long id) {
-        Books book = findById(id);
+    public Book deleteBook(Long id) {
+        Book book = findById(id);
         bookRepository.delete(book);
         return book;
     }
@@ -114,7 +114,7 @@ public class BookService {
 
     // ISBN 조회
     @Transactional(readOnly = true)
-    public Books findByIsbn13(String isbn13) {
+    public Book findByIsbn13(String isbn13) {
 
         return bookRepository.findByIsbn13(isbn13)
                 .orElseThrow(
@@ -124,7 +124,7 @@ public class BookService {
 
     // 통합 검색 기능 추가 (Controller에 통합 검색 API 추가)
     @Transactional(readOnly = true)
-    public Page<Books> searchBooks(
+    public Page<Book> searchBooks(
             String keyword,
             int page,
             int size
@@ -142,7 +142,7 @@ public class BookService {
 
     // 내가 등록한 책 조회
     @Transactional(readOnly = true)
-    public Page<Books> findMyBooks(
+    public Page<Book> findMyBooks(
             Long userId,
             int page,
             int size
@@ -164,7 +164,7 @@ public class BookService {
 
     // 내가 대출한 책 조회
     @Transactional(readOnly = true)
-    public Page<Books> findBorrowedBooks(
+    public Page<Book> findBorrowedBooks(
             Long borrowerId,
             int page,
             int size
@@ -186,7 +186,7 @@ public class BookService {
 
     // 강추 도서 조회
     @Transactional(readOnly = true)
-    public Page<Books> findBestBooks(
+    public Page<Book> findBestBooks(
             int page,
             int size
     ) {
@@ -200,7 +200,7 @@ public class BookService {
 
     // 인기 도서 TOP10
     @Transactional(readOnly = true)
-    public List<Books> getPopularBooks() {
+    public List<Book> getPopularBooks() {
         return bookRepository.findTop10PopularBooks();
     }
 
