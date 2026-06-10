@@ -21,4 +21,7 @@ public interface SearchHistoryRepository
 
     // 특정 사용자의 전체 검색 기록을 최신순으로 조회
     List<SearchHistory> findAllByUserIdOrderByCreatedAtDesc(Long userId);
+
+    @Transactional
+    void deleteByUserIdAndKeyword(Long userId, String keyword);
 }
