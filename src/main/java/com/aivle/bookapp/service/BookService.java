@@ -79,6 +79,13 @@ public class BookService {
         return bookRepository.findAll(pageable);
     }
 
+    // 특정 사용자가 등록한 도서 목록 페이징 처리하여 반환
+    @Transactional(readOnly = true)
+    public Page<Book> getPageByUserId(Long userId, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+        return bookRepository.findByUser_Id(userId, pageable);
+    }
+
     // 책 생성
     @Transactional
     public Book createBook(Book book) {
@@ -104,6 +111,18 @@ public class BookService {
         Book book = findById(id);
         bookRepository.delete(book);
         return book;
+    }
+
+    // ISBN13 중복 체크
+    @Transactional(readOnly = true)
+    public boolean existsByIsbn13(String isbn13) {
+        return bookRepository.existsByIsbn13(isbn13);
+    }
+
+    // 인기 도서 TOP 10 조회
+    @Transactional(readOnly = true)
+    public List<Book> getTop10PopularBooks() {
+        return bookRepository.findTop10ByOrderByLikeCountDesc();
     }
 }
 

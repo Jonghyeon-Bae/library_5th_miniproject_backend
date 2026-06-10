@@ -35,6 +35,12 @@ public class BookController {
         return ResponseEntity.ok(bookService.findById(id));
     }
 
+    // ISBN 중복 확인 API
+    @GetMapping("/check-isbn")
+    public ResponseEntity<Boolean> checkIsbn(@RequestParam("isbn13") String isbn13) {
+        return ResponseEntity.ok(bookService.existsByIsbn13(isbn13));
+    }
+
     //[소한민] API 도서목록 검색 페이징/키워드 검색 통합
     @GetMapping
     public ResponseEntity<PageResponseDto<BookResponseDto>> getBooks(
@@ -52,6 +58,26 @@ public class BookController {
         PageResponseDto<BookResponseDto> response = new PageResponseDto<>(dtoPage);
 
         return ResponseEntity.ok(response);
+    }
+
+    // 특정 사용자가 등록한 도서 목록 조회 API
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<PageResponseDto<BookResponseDto>> getBooksByUser(
+            @PathVariable("userId") Long userId,
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "10") int size) {
+        
+        Page<Book> bookPage = bookService.getPageByUserId(userId, page, size);
+        Page<BookResponseDto> dtoPage = bookPage.map(BookResponseDto::new);
+        return ResponseEntity.ok(new PageResponseDto<>(dtoPage));
+    }
+
+    // 인기 도서 TOP 10 랭킹 API
+    @GetMapping("/ranking")
+    public ResponseEntity<List<BookResponseDto>> getRanking() {
+        List<Book> books = bookService.getTop10PopularBooks();
+        List<BookResponseDto> dtos = books.stream().map(BookResponseDto::new).toList();
+        return ResponseEntity.ok(dtos);
     }
 
     // @DeleteMapping("/books/{id}")
