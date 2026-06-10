@@ -82,7 +82,7 @@ public class BookService {
     @Transactional(readOnly = true)
     public Page<Book> getPageByUserId(Long userId, int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
-        return bookRepository.findByUser_Id(userId, pageable);
+        return bookRepository.findByUserId(userId, pageable);
     }
 
     // 책 생성
@@ -139,7 +139,7 @@ public class BookService {
         Pageable pageable = PageRequest.of(page, size);
 
         return bookRepository
-                .findByTitleContainingIgnoreCaseOrAuthorContainingIgnoreCase(
+                .findByTitleContainingOrAuthorContaining(
                         keyword,
                         keyword,
                         pageable
@@ -156,7 +156,7 @@ public class BookService {
 
         Pageable pageable = PageRequest.of(page, size);
 
-        return bookRepository.findByUser_Id(
+        return bookRepository.findByUserId(
                 userId,
                 pageable
         );
@@ -165,7 +165,7 @@ public class BookService {
     // 내가 등록한 책 개수 조회
     @Transactional(readOnly = true)
     public long countMyBooks(Long userId) {
-        return bookRepository.countByUser_Id(userId);
+        return bookRepository.countByUserId(userId);
     }
 
     // 내가 대출한 책 조회
@@ -178,7 +178,7 @@ public class BookService {
 
         Pageable pageable = PageRequest.of(page, size);
 
-        return bookRepository.findByBorrower_Id(
+        return bookRepository.findByBorrowerId(
                 borrowerId,
                 pageable
         );
@@ -187,7 +187,7 @@ public class BookService {
     // 내가 대출한 책 개수 조회
     @Transactional(readOnly = true)
     public long countBorrowedBooks(Long borrowerId) {
-        return bookRepository.countByBorrower_Id(borrowerId);
+        return bookRepository.countByBorrowerId(borrowerId);
     }
 
     // 강추 도서 조회
