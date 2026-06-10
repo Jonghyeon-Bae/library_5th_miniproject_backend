@@ -13,7 +13,6 @@ import lombok.*;
 @Table(name = "search_history")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@AllArgsConstructor
 @EntityListeners(AuditingEntityListener.class)
 public class SearchHistory {
 
@@ -22,17 +21,14 @@ public class SearchHistory {
     private Long id;
 
     //외래키 설정 1:M 관계,USER 이름 Not null
-    @Setter
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @Setter
     @Column(nullable = false)
     private String keyword;
 
     // 생성될 때 시간 자동 입력  업데이트
-    @Setter
     @CreatedDate
     @Column(updatable = false)
     private LocalDateTime createdAt;
