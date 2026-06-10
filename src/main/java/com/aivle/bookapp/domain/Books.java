@@ -9,6 +9,7 @@ import lombok.Setter;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -16,13 +17,13 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 
 @Entity
-@Table(name = "BOOK")
+@Table(name = "books")
 @Getter
 @Setter
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @EntityListeners(AuditingEntityListener.class)
-public class Book {
+public class Books {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -39,34 +40,32 @@ public class Book {
     @JoinColumn(name = "borrower_id")
     private Users borrower;
 
-    @Column(nullable = false, length = 200)
+    @Column(nullable = false)
     @NotBlank(message = "Title is required")
     private String title;
 
-    @Column(nullable = false, length = 255)
+    @Column(nullable = false)
     @NotBlank(message = "Author is required")
     private String author;
 
-    @Column(nullable = false, length = 255)
+    @Column(nullable = false)
     @NotBlank(message = "Contents is required")
     private String contents;
 
-    @Column(nullable = false, length = 255)
+    @Column(nullable = false)
     @NotBlank(message = "Publisher is required")
     private String publisher;
 
-    @Column(length = 255)
+    @Column(columnDefinition = "LONGTEXT")
     private String thumbnail;
 
-    @Column(nullable = false)
-    private Boolean is_available;
+    @Column(name = "is_available")
+    private Boolean isAvailable = true;
 
-    @Column(nullable = false)
-    private Boolean bestbook;
+    private Boolean bestbook = false;
 
-    @Column(nullable = false)
-    @Min(value = 0, message = "like_count must be at least 0")
-    private int like_count;
+    @Column(name = "like_count", nullable = false)
+    private int likeCount = 0;
 
     @Column(length = 511)
     private String ai_review;
@@ -87,35 +86,35 @@ public class Book {
     private LocalDateTime updated_at;
 
     public void increaseLikeCount() {
-        this.like_count++;
+        this.likeCount++;
     }
 
     public void decreaseLikeCount() {
-        if (this.like_count > 0) {
-            this.like_count--;
+        if (this.likeCount > 0) {
+            this.likeCount--;
         }
     }
 
     // 대출 처리 메서드
     public void borrowBook(Users borrower) {
-        this.is_available = false;
+        this.isAvailable = false;
         this.borrower = borrower;
     }
     // 반납 처리 메서드
     public void returnBook() {
-        this.is_available = true;
+        this.isAvailable = true;
         this.borrower = null;
     }
 
     public void updateBook(String title, String contents, String author,
-                           String publisher, String thumbnail, Boolean is_available,
+                           String publisher, String thumbnail, Boolean isAvailable,
                            Boolean bestbook, String ai_review) {
         this.title = title;
         this.contents = contents;
         this.author = author;
         this.publisher = publisher;
         this.thumbnail = thumbnail;
-        this.is_available = is_available;
+        this.isAvailable = isAvailable;
         this.bestbook = bestbook;
         this.ai_review = ai_review;
     }

@@ -2,9 +2,11 @@ package com.aivle.bookapp.domain;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -13,11 +15,13 @@ import java.time.LocalDateTime;
 
 @Entity
 @Getter
-@Table(name="USERS")
+@Setter
+@Table(name = "users")
 @NoArgsConstructor
 @AllArgsConstructor
 @EntityListeners(AuditingEntityListener.class)
 public class Users {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -30,38 +34,42 @@ public class Users {
     @NotBlank(message = "Password is required")
     private String password;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 100)
     private String name;
 
+    @Column(length = 500)
     private String avatar;
 
-    @Column(nullable = false)
-    private Boolean email_visibility = false;
+    @Column(name = "email_visibility")
+    private Boolean emailVisibility = false;
 
-    @Column(nullable = false)
     private Boolean verified = false;
 
     @CreatedDate
-    @Column(nullable = false, updatable = false)
-    private LocalDateTime created_at;
+    @Column(name = "created_at", updatable = false)
+    private LocalDateTime createdAt;
 
     @LastModifiedDate
-    @Column(nullable = false)
-    private LocalDateTime updated_at;
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
 
     public Users(String email, String password, String name, String avatar) {
         this.email = email;
         this.password = password;
         this.name = name;
         this.avatar = avatar;
-        this.email_visibility = false;
-        this.verified = false;
     }
 
-    public void updateProfile(String name, String avatar, Boolean email_visibility) {
-        if (name != null) this.name = name;
-        if (avatar != null) this.avatar = avatar;
-        if (email_visibility != null) this.email_visibility = email_visibility;
+    public void updateProfile(String name, String avatar, Boolean emailVisibility) {
+        if (name != null) {
+            this.name = name;
+        }
+        if (avatar != null) {
+            this.avatar = avatar;
+        }
+        if (emailVisibility != null) {
+            this.emailVisibility = emailVisibility;
+        }
     }
 
     public void changePassword(String newPassword) {
@@ -77,6 +85,6 @@ public class Users {
     }
 
     public void changeEmailVisibility() {
-        this.email_visibility = !this.email_visibility;
+        this.emailVisibility = !this.emailVisibility;
     }
 }
