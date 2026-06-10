@@ -12,6 +12,7 @@ public class WebConfig implements WebMvcConfigurer {
         registry.addMapping("/**") // 모든 API 주소에 대해 CORS 허용
                 .allowedOrigins(
                     "http://localhost:3000"           // 로컬 Next.js 개발 서버
+                    // "실제환경 주소 여기다가 기입. "           // 로컬 Next.js 개발 서버
                 )
                 .allowedMethods("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS")
                 .allowedHeaders("*")

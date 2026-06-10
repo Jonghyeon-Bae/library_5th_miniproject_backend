@@ -54,6 +54,7 @@ public class AuthService {
                 .email(user.getEmail())
                 .name(user.getName())
                 .avatar(user.getAvatar())
+                .createdAt(user.getCreatedAt())
                 .build();
     }
 }

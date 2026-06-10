@@ -73,10 +73,23 @@ public class BookService {
         return books.stream().map(b -> b.getTitle()).toList();
     }
 
-    // 정렬 기준(오름차순)으로 도서 목록을 페이징 처리하여 반환
+    // 정렬 기준으로 도서 목록을 페이징 처리하여 반환
     @Transactional(readOnly = true)
-    public Page<Book> getPage(int page, int size, String sortBy) {
-        Sort sort = Sort.by(sortBy).ascending();
+    public Page<Book> getPage(int page, int size, String sortParam) {
+        Sort sort = Sort.by("createdAt").descending(); // 기본값: 최신순
+
+        if (sortParam != null) {
+            if (sortParam.equals("-created") || sortParam.equals("-createdAt")) {
+                sort = Sort.by("createdAt").descending();
+            } else if (sortParam.equals("created") || sortParam.equals("createdAt")) {
+                sort = Sort.by("createdAt").ascending();
+            } else if (sortParam.equals("title")) {
+                sort = Sort.by("title").ascending();
+            } else if (sortParam.equals("-title")) {
+                sort = Sort.by("title").descending();
+            }
+        }
+
         Pageable pageable = PageRequest.of(page, size, sort);
         return bookRepository.findAll(pageable);
     }
@@ -180,15 +193,29 @@ public class BookService {
                 );
     }
 
-    // 통합 검색 기능 추가 (Controller에 통합 검색 API 추가)
+    // 통합 검색 기능 추가 (정렬 파라미터 반영)
     @Transactional(readOnly = true)
     public Page<Book> searchBooks(
             String keyword,
             int page,
-            int size
+            int size,
+            String sortParam
     ) {
+        Sort sort = Sort.by("createdAt").descending(); // 기본값: 최신순
 
-        Pageable pageable = PageRequest.of(page, size);
+        if (sortParam != null) {
+            if (sortParam.equals("-created") || sortParam.equals("-createdAt")) {
+                sort = Sort.by("createdAt").descending();
+            } else if (sortParam.equals("created") || sortParam.equals("createdAt")) {
+                sort = Sort.by("createdAt").ascending();
+            } else if (sortParam.equals("title")) {
+                sort = Sort.by("title").ascending();
+            } else if (sortParam.equals("-title")) {
+                sort = Sort.by("title").descending();
+            }
+        }
+
+        Pageable pageable = PageRequest.of(page, size, sort);
 
         return bookRepository
                 .findByTitleContainingOrAuthorContaining(
