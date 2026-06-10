@@ -2,7 +2,6 @@ package com.aivle.bookapp.service;
 
 import java.util.List;
 
-import com.aivle.bookapp.domain.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -77,6 +76,13 @@ public class BookService {
         Sort sort = Sort.by(sortBy).ascending();
         Pageable pageable = PageRequest.of(page, size, sort);
         return bookRepository.findAll(pageable);
+    }
+
+    // 특정 사용자가 등록한 도서 목록 페이징 처리하여 반환
+    @Transactional(readOnly = true)
+    public Page<Book> getPageByUserId(Long userId, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+        return bookRepository.findByUser_Id(userId, pageable);
     }
 
     // 책 생성
