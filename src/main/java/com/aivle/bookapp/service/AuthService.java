@@ -30,7 +30,7 @@ public class AuthService {
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setName(request.getName());
         user.setAvatar(request.getAvatar());
-        user.setEmail_visibility(true);
+        user.setEmailVisibility(true);
         user.setVerified(false);
 
         return usersRepository.save(user);
