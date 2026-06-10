@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.aivle.bookapp.domain.Books;
+import com.aivle.bookapp.domain.Book;
 import com.aivle.bookapp.dto.LikeStatusResponse;
 import com.aivle.bookapp.service.LikeService;
 
@@ -71,10 +71,10 @@ public class LikeController {
      * 현재 사용자가 좋아요를 누른 도서 목록을 조회합니다.
      */
     @GetMapping("/api/books/liked")
-    public ResponseEntity<List<Books>> getLikedBooks(
+    public ResponseEntity<List<Book>> getLikedBooks(
             @AuthenticationPrincipal UserDetails userDetails) {
 
-        List<Books> likedBooks = likeService.getLikedBooks(getUsername(userDetails));
+        List<Book> likedBooks = likeService.getLikedBooks(getUsername(userDetails));
         return ResponseEntity.ok(likedBooks);
     }
 }
