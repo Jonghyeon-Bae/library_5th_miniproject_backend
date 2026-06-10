@@ -222,6 +222,13 @@ public class BookService {
         return bookRepository.countByIsAvailableFalse();
     }
 
+    // 표지 이미지 업데이트
+    @Transactional
+    public Book updateCover(Long id, String coverDataUrl) {
+        Book existBook = findById(id);
+        existBook.updateBookInfo(null, null, null, null, coverDataUrl, null, null, null);
+        return bookRepository.save(existBook);
+    }
 }
 
 
