@@ -3,9 +3,7 @@ package com.aivle.bookapp.repository;
 
 import java.util.List;
 import java.util.Optional;
-
 import org.springframework.data.jpa.repository.JpaRepository;
-
 import com.aivle.bookapp.domain.Like;
 
 public interface LikeRepository extends JpaRepository<Like, Long> {
