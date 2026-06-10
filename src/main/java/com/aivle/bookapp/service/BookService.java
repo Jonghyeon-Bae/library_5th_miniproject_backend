@@ -215,6 +215,7 @@ public class BookService {
     public long getBorrowedBookCount() {
         return bookRepository.countByIsAvailableFalse();
     }
+
 }
 
 
