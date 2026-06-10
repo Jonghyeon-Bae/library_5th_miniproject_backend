@@ -191,7 +191,7 @@ public class BookService {
         Pageable pageable = PageRequest.of(page, size);
 
         return bookRepository
-                .findByTitleContainingIgnoreCaseOrAuthorContainingIgnoreCase(
+                .findByTitleContainingOrAuthorContaining(
                         keyword,
                         keyword,
                         pageable
