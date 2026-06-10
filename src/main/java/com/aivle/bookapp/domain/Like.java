@@ -6,19 +6,20 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
+
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Entity
 @Getter
-@Setter
-@Table(name = "likes")
+@Table(name = "likes", uniqueConstraints = {
+    @UniqueConstraint(name = "uq_likes_book_user", columnNames = {"book_id", "user_id"})
+})
 @NoArgsConstructor
 @AllArgsConstructor
-public class Likes {
+@EntityListeners(AuditingEntityListener.class)
+
+public class Like {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -27,12 +28,12 @@ public class Likes {
     @Setter
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
-    private Users users;
+    private User user;
 
     @Setter
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "book_id", nullable = false)
-    private Books book;
+    private Book book;
 
     @CreatedDate
     @Column(name = "created_at", updatable = false)
@@ -43,8 +44,8 @@ public class Likes {
     private LocalDateTime updatedAt;
 
     @Builder
-    public Likes(Books book, Users users) {
+    public Like(Book book, User user) {
         this.book = book;
-        this.users = users;
+        this.user = user;
     }
 }
