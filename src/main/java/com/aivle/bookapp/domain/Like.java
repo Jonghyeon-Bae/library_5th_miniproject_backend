@@ -15,8 +15,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @Table(name = "likes", uniqueConstraints = {
     @UniqueConstraint(name = "uq_likes_book_user", columnNames = {"book_id", "user_id"})
 })
-@NoArgsConstructor
-@AllArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @EntityListeners(AuditingEntityListener.class)
 
 public class Like {
@@ -25,12 +24,10 @@ public class Like {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Setter
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @Setter
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "book_id", nullable = false)
     private Book book;
