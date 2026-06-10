@@ -1,6 +1,6 @@
 package com.aivle.bookapp.controller;
 
-import com.aivle.bookapp.domain.Users;
+import com.aivle.bookapp.domain.User;
 import com.aivle.bookapp.dto.LoginRequest;
 import com.aivle.bookapp.dto.SignUpRequest;
 import com.aivle.bookapp.dto.TokenResponse;
@@ -22,8 +22,8 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/signup")
-    public ResponseEntity<Users> signup(@Valid @RequestBody SignUpRequest request) {
-        Users registeredUser = authService.signUp(request);
+    public ResponseEntity<User> signup(@Valid @RequestBody SignUpRequest request) {
+        User registeredUser = authService.signUp(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(registeredUser);
     }
 

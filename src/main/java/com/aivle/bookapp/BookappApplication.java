@@ -6,7 +6,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 
-import com.aivle.bookapp.domain.Books;
+import com.aivle.bookapp.domain.Book;
 import com.aivle.bookapp.repository.BookRepository;
 
 @EnableJpaAuditing

@@ -1,9 +1,8 @@
 package com.aivle.bookapp.config.security;
 
-import com.aivle.bookapp.domain.Users;
+import com.aivle.bookapp.domain.User;
 import com.aivle.bookapp.repository.UsersRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -19,12 +18,12 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        Users users = usersRepository.findByEmail(email)
+        User user = usersRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
 
-        return new User(
-                users.getEmail(),
-                users.getPassword(),
+        return new org.springframework.security.core.userdetails.User(
+                user.getEmail(),
+                user.getPassword(),
                 Collections.emptyList()
         );
     }

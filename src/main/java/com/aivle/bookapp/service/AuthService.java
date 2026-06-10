@@ -1,6 +1,6 @@
 package com.aivle.bookapp.service;
 
-import com.aivle.bookapp.domain.Users;
+import com.aivle.bookapp.domain.User;
 import com.aivle.bookapp.dto.LoginRequest;
 import com.aivle.bookapp.dto.SignUpRequest;
 import com.aivle.bookapp.dto.TokenResponse;
@@ -20,25 +20,26 @@ public class AuthService {
     private final JwtTokenProvider jwtTokenProvider;
 
     @Transactional
-    public Users signUp(SignUpRequest request) {
+    public User signUp(SignUpRequest request) {
         if (usersRepository.existsByEmail(request.getEmail())) {
             throw new RuntimeException("Email is already in use");
         }
 
-        Users user = new Users();
-        user.setEmail(request.getEmail());
-        user.setPassword(passwordEncoder.encode(request.getPassword()));
-        user.setName(request.getName());
-        user.setAvatar(request.getAvatar());
-        user.setEmailVisibility(true);
-        user.setVerified(false);
+        User user = User.builder()
+                .email(request.getEmail())
+                .password(passwordEncoder.encode(request.getPassword()))
+                .name(request.getName())
+                .avatar(request.getAvatar())
+                .emailVisibility(true)
+                .verified(false)
+                .build();
 
         return usersRepository.save(user);
     }
 
     @Transactional(readOnly = true)
     public TokenResponse login(LoginRequest request) {
-        Users user = usersRepository.findByEmail(request.getEmail())
+        User user = usersRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new RuntimeException("Invalid email or password"));
 
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {

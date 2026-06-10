@@ -52,12 +52,14 @@ public class User {
 
     // Setter 대신 생성 시점에 Builder를 통해 값을 주입
     @Builder
-    public User(String email, String password, String name, String avatar, String tokenKey) {
+    public User(String email, String password, String name, String avatar, String tokenKey, Boolean emailVisibility, Boolean verified) {
         this.email = email;
         this.password = password;
         this.name = name;
         this.avatar = avatar;
         this.tokenKey = tokenKey;
+        this.emailVisibility = emailVisibility != null ? emailVisibility : false;
+        this.verified = verified != null ? verified : false;
     }
 
     public void updateProfile(String name, String avatar, Boolean emailVisibility) {
@@ -82,5 +84,13 @@ public class User {
 
     public void verifyAccount() {
         this.verified = true;
+    }
+
+    public void updateAvatar(String avatar) {
+        this.avatar = avatar;
+    }
+
+    public void changeEmailVisibility() {
+        this.emailVisibility = (this.emailVisibility == null) ? true : !this.emailVisibility;
     }
 }
