@@ -3,11 +3,15 @@ package com.aivle.bookapp.repository;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import com.aivle.bookapp.domain.Book;
+import com.aivle.bookapp.domain.Books;
 
-public interface BookRepository extends JpaRepository<Book, Long> {
-    List<Book> findByTitle(String title);
-    List<Book> findByAuthor(String author);
-    List<Book> findByTitleContaining(String keyword);
-    List<Book> findByTitleAndAuthor(String title, String author);
+public interface BookRepository extends JpaRepository<Books, Long> {
+
+    List<Books> findByTitle(String title);
+
+    List<Books> findByAuthor(String author);
+
+    List<Books> findByTitleContaining(String keyword);
+
+    List<Books> findByTitleAndAuthor(String title, String author);
 }

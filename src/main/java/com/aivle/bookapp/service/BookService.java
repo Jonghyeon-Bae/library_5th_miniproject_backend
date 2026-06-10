@@ -9,7 +9,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.aivle.bookapp.domain.Book;
+import com.aivle.bookapp.domain.Books;
 import com.aivle.bookapp.exception.BookNotFoundException;
 import com.aivle.bookapp.repository.BookRepository;
 
@@ -18,16 +18,17 @@ import lombok.RequiredArgsConstructor;
 @Service
 @RequiredArgsConstructor
 public class BookService {
+
     private final BookRepository bookRepository;
 
     @Transactional(readOnly = true)
-    public Book findById(Long id){
-        return bookRepository.findById(id).orElseThrow(()-> new BookNotFoundException(id));
-        
+    public Books findById(Long id) {
+        return bookRepository.findById(id).orElseThrow(() -> new BookNotFoundException(id));
+
     }
 
     @Transactional(readOnly = true)
-    public List<Book> findAll(){
+    public List<Books> findAll() {
         return bookRepository.findAll();
     }
 
@@ -38,58 +39,64 @@ public class BookService {
     //     }throw new RuntimeException("Book not Found : "+id);
     // }
     @Transactional(readOnly = true)
-    public String getCount(){
+    public String getCount() {
         return String.valueOf(bookRepository.count());
     }
+
     @Transactional(readOnly = true)
-    public List<Book> searchByTitle(String title){
+    public List<Books> searchByTitle(String title) {
         return bookRepository.findByTitle(title);
     }
+
     @Transactional(readOnly = true)
-    public List<Book> searchByAuthor(String author){
+    public List<Books> searchByAuthor(String author) {
         return bookRepository.findByAuthor(author);
     }
+
     @Transactional(readOnly = true)
-    public List<Book> searchByTitleContaining(String keyword){
+    public List<Books> searchByTitleContaining(String keyword) {
         return bookRepository.findByTitleContaining(keyword);
     }
+
     @Transactional(readOnly = true)
-    public List<Book> searchByTitleAndAuthor(String title, String author){
+    public List<Books> searchByTitleAndAuthor(String title, String author) {
         return bookRepository.findByTitleAndAuthor(title, author);
     }
+
     @Transactional(readOnly = true)
-    public List<String> authorGetTitle(String author){
-        List<Book> books = bookRepository.findByAuthor(author);
-        return books.stream().map(b->b.getTitle()).toList();
+    public List<String> authorGetTitle(String author) {
+        List<Books> books = bookRepository.findByAuthor(author);
+        return books.stream().map(b -> b.getTitle()).toList();
     }
+
     @Transactional(readOnly = true)
-    public Page<Book> getPage(int page, int size,String sortBy){
+    public Page<Books> getPage(int page, int size, String sortBy) {
         Sort sort = Sort.by(sortBy).ascending();
-        Pageable pageable = PageRequest.of(page,size,sort);
+        Pageable pageable = PageRequest.of(page, size, sort);
         return bookRepository.findAll(pageable);
     }
+
     @Transactional
-    public Book createBook(Book book){
+    public Books createBook(Books book) {
         return bookRepository.save(book);
     }
+
     @Transactional
-    public Book updateBook(Long id,Book book){
-        Book existBook = findById(id);
-        if(book.getTitle()!=null){
+    public Books updateBook(Long id, Books book) {
+        Books existBook = findById(id);
+        if (book.getTitle() != null) {
             existBook.setTitle(book.getTitle());
         }
-        if(book.getAuthor()!=null){
+        if (book.getAuthor() != null) {
             existBook.setAuthor(book.getAuthor());
         }
         return bookRepository.save(existBook);
     }
+
     @Transactional
-    public Book deleteBook(Long id){
-        Book book = findById(id);
+    public Books deleteBook(Long id) {
+        Books book = findById(id);
         bookRepository.delete(book);
         return book;
     }
 }
-
-
-
