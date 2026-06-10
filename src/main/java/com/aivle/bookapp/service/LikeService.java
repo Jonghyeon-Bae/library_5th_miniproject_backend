@@ -35,7 +35,7 @@ public class LikeService {
         Book book = bookRepository.findById(bookId)
                 .orElseThrow(() -> new BookNotFoundException(bookId));
 
-        if (likeRepository.existsByBook_IdAndUser_Id(bookId, user.getId())) {
+        if (likeRepository.existsByBookIdAndUserId(bookId, user.getId())) {
             throw new RuntimeException("이미 좋아요를 누른 도서입니다.");
         }
 
@@ -59,7 +59,7 @@ public class LikeService {
         Book book = bookRepository.findById(bookId)
                 .orElseThrow(() -> new BookNotFoundException(bookId));
 
-        Like like = likeRepository.findByBook_IdAndUser_Id(bookId, user.getId())
+        Like like = likeRepository.findByBookIdAndUserId(bookId, user.getId())
                 .orElseThrow(() -> new RuntimeException("좋아요 기록을 찾을 수 없습니다."));
 
         likeRepository.delete(like);
@@ -77,7 +77,7 @@ public class LikeService {
         Book book = bookRepository.findById(bookId)
                 .orElseThrow(() -> new BookNotFoundException(bookId));
 
-        boolean liked = likeRepository.existsByBook_IdAndUser_Id(bookId, user.getId());
+        boolean liked = likeRepository.existsByBookIdAndUserId(bookId, user.getId());
 
         return LikeStatusResponse.builder()
                 .liked(liked)
@@ -93,7 +93,7 @@ public class LikeService {
         User user = usersRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다. email: " + email));
 
-        List<Like> likesList = likeRepository.findByUser_Id(user.getId());
+        List<Like> likesList = likeRepository.findByUserId(user.getId());
         
         return likesList.stream()
                 .map(Like::getBook)
