@@ -24,7 +24,7 @@ public interface BookRepository extends JpaRepository<Book, Long> {
 
 
         // 등록된 도서 검색_
-        Page<Book> findByTitleContainingIgnoreCaseOrAuthorContainingIgnoreCase(
+        Page<Book> findByTitleContainingOrAuthorContaining(
                 String titleKeyword,
                 String authorKeyword,
                 Pageable pageable

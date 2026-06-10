@@ -19,7 +19,7 @@ public class SearchHistoryService {
     private final UsersRepository usersRepository;
 
     public List<SearchHistory> findRecentTop5(Long userId) {
-        return searchHistoryRepository.findRecentTop5ByUserId(userId);
+        return searchHistoryRepository.findTop5ByUserIdOrderByCreatedAtDesc(userId);
     }
 
     @Transactional
