@@ -3,120 +3,129 @@ package com.aivle.bookapp.domain;
 import java.time.LocalDateTime;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
-import lombok.Setter;
+
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 
 @Entity
 @Table(name = "books")
 @Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @EntityListeners(AuditingEntityListener.class)
 public class Book {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     //외래키 설정 1:M 관계, 책 등록자는 Not null
-    @Setter
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
-    private Users user;
+    private User user;
 
     //외래키 설정, 1:M 관계, 대여자는 Null 허용
-    @Setter
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "borrower_id")
-    private Users borrower;
+    private User borrower;
 
-    @Column(nullable = false, length = 200)
+    @Column(nullable = false)
     @NotBlank(message = "Title is required")
     private String title;
 
-    @Column(nullable = false, length = 255)
+    @Column(nullable = false)
     @NotBlank(message = "Author is required")
     private String author;
 
-    @Column(nullable = false, length = 255)
-    @NotBlank(message = "Contents is required")
+    @Column(columnDefinition = "TEXT")
     private String contents;
 
-    @Column(nullable = false, length = 255)
+    @Column(nullable = false)
     @NotBlank(message = "Publisher is required")
     private String publisher;
 
-    @Column(length = 255)
+    @Column(columnDefinition = "LONGTEXT")
     private String thumbnail;
 
-    @Column(nullable = false)
-    private Boolean is_available;
+    @Column(name = "is_available")
+    private Boolean isAvailable = true;
 
-    @Column(nullable = false)
-    private Boolean bestbook;
+    private Boolean bestbook = false;
 
-    @Column(nullable = false)
-    @Min(value = 0, message = "like_count must be at least 0")
-    private int like_count;
+    @Column(name = "like_count", nullable = false)
+    private int likeCount = 0;
 
-    @Column(length = 511)
-    private String ai_review;
+    @Column(name = "ai_review", columnDefinition = "TEXT")
+    private String aiReview;
 
+    @Column(unique = true, length = 13)
     private String isbn13;
 
     @Column(length = 100)
     private String category;
 
-    private int sales;
+    private int sales = 0;
 
     @CreatedDate
-    @Column(nullable = false, updatable = false)
-    private LocalDateTime created_at;
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private LocalDateTime createdAt;
 
     @LastModifiedDate
-    @Column(nullable = false)
-    private LocalDateTime updated_at;
+    @Column(name = "updated_at", nullable = false)
+    private LocalDateTime updatedAt;
+
+    // 책을 처음 등록할 때 필요한 필수 정보들
+    @Builder
+    public Book(User user, String title, String author, String publisher, 
+                String thumbnail, String category, String contents, String isbn13) {
+        this.user = user;
+        this.title = title;
+        this.author = author;
+        this.publisher = publisher;
+        this.thumbnail = thumbnail;
+        this.category = category;
+        this.contents = contents;
+        this.isbn13 = isbn13;
+    }
+
+    // 상태 변경 메서드(Setter 대체)
 
     public void increaseLikeCount() {
-        this.like_count++;
+        this.likeCount++;
     }
 
     public void decreaseLikeCount() {
-        if (this.like_count > 0) {
-            this.like_count--;
+        if (this.likeCount > 0) {
+            this.likeCount--;
         }
     }
 
     // 대출 처리 메서드
-    public void borrowBook(Users borrower) {
-        this.is_available = false;
+    public void borrowBook(User borrower) {
+        this.isAvailable = false;
         this.borrower = borrower;
     }
     // 반납 처리 메서드
     public void returnBook() {
-        this.is_available = true;
+        this.isAvailable = true;
         this.borrower = null;
     }
 
-    public void updateBook(String title, String contents, String author,
-                           String publisher, String thumbnail, Boolean is_available,
-                           Boolean bestbook, String ai_review) {
-        this.title = title;
-        this.contents = contents;
-        this.author = author;
-        this.publisher = publisher;
-        this.thumbnail = thumbnail;
-        this.is_available = is_available;
-        this.bestbook = bestbook;
-        this.ai_review = ai_review;
+    // 책의 메타 정보를 수정할 때 사용
+    public void updateBookInfo(String title, String contents, String author,
+                               String publisher, String thumbnail, Boolean isAvailable,
+                               Boolean bestbook, String aiReview) {
+        if (title != null) this.title = title;
+        if (contents != null) this.contents = contents;
+        if (author != null) this.author = author;
+        if (publisher != null) this.publisher = publisher;
+        if (thumbnail != null) this.thumbnail = thumbnail;
+        if (isAvailable != null) this.isAvailable = isAvailable;
+        if (bestbook != null) this.bestbook = bestbook;
+        if (aiReview != null) this.aiReview = aiReview;
     }
 }

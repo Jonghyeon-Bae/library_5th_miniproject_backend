@@ -21,7 +21,7 @@ public interface SearchHistoryRepository
                 .stream()
                 .sorted(
                         Comparator.comparing(
-                                SearchHistory::getCreated_at,
+                                SearchHistory::getCreatedAt,
                                 Comparator.nullsLast(
                                         Comparator.reverseOrder()
                                 )
@@ -39,7 +39,7 @@ public interface SearchHistoryRepository
                 .stream()
                 .sorted(
                         Comparator.comparing(
-                                SearchHistory::getCreated_at,
+                                SearchHistory::getCreatedAt,
                                 Comparator.nullsLast(
                                         Comparator.reverseOrder()
                                 )

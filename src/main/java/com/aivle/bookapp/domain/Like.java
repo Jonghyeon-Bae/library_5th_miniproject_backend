@@ -4,33 +4,36 @@ import java.time.LocalDateTime;
 
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import jakarta.persistence.*;
 import lombok.*;
 
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
 @Entity
-@Table(name = "search_history")
 @Getter
+@Table(name = "likes", uniqueConstraints = {
+    @UniqueConstraint(name = "uq_likes_book_user", columnNames = {"book_id", "user_id"})
+})
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @EntityListeners(AuditingEntityListener.class)
-public class SearchHistory {
+
+public class Like {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    //외래키 설정 1:M 관계,USER 이름 Not null
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @Column(nullable = false)
-    private String keyword;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "book_id", nullable = false)
+    private Book book;
 
-    // 생성될 때 시간 자동 입력  업데이트
     @CreatedDate
-    @Column(updatable = false)
+    @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
     @LastModifiedDate
@@ -38,8 +41,8 @@ public class SearchHistory {
     private LocalDateTime updatedAt;
 
     @Builder
-    public SearchHistory(String keyword, User user) {
-        this.keyword = keyword;
+    public Like(Book book, User user) {
+        this.book = book;
         this.user = user;
     }
 }
