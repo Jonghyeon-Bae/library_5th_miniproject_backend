@@ -37,23 +37,23 @@ public interface BookRepository extends JpaRepository<Book, Long> {
         Optional<Book> findByIsbn13(String isbn13);
 
         // 마이페이지: 내가 등록한 책
-        Page<Book> findByUser_Id(Long userId, Pageable pageable);
+        Page<Book> findByUserId(Long userId, Pageable pageable);
 
         // 마이페이지: 내가 등록한 책의 개수 조회
-        long countByUser_Id(Long userId);
+        long countByUserId(Long userId);
 
         // 마이페이지: 내가 대출한 책
-        Page<Book> findByBorrower_Id(Long borrowerId, Pageable pageable);
+        Page<Book> findByBorrowerId(Long borrowerId, Pageable pageable);
 
         // 마이페이지: 내가 대출한 책의 개수 조회
-        long countByBorrower_Id(Long borrowerId);
+        long countByBorrowerId(Long borrowerId);
 
         // 강력 추천 도서 조회
         Page<Book> findByBestbookTrue(Pageable pageable);
         
         // 좋아요 수가 높은 인기 도서 TOP 10 조회 - 좌측 배너용
         List<Book> findTop10ByOrderByLikeCountDesc();
-
+        
         // 대출 가능한 도서 수 조회 - 대시보드용
         long countByIsAvailableTrue();
 
