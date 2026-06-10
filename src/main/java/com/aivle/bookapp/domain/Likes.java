@@ -43,8 +43,8 @@ public class Likes {
     private LocalDateTime updatedAt;
 
     @Builder
-    public Like(Book book, User user) {
+    public Likes(Books book, Users users) {
         this.book = book;
-        this.user = user;
+        this.users = users;
     }
 }

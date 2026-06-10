@@ -17,7 +17,7 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @Table(name = "users")
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@NoArgsConstructor
 @AllArgsConstructor
 @EntityListeners(AuditingEntityListener.class)
 public class Users {
