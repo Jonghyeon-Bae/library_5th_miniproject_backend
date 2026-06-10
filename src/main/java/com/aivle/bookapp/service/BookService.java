@@ -112,28 +112,15 @@ public class BookService {
     public Book updateBook(Long id, Map<String, Object> payload) {
         Book existBook = findById(id);
 
-        if (payload.containsKey("title")) {
-            existBook.updateBookInfo((String) payload.get("title"), null, null, null, null, null, null, null);
-        }
-        if (payload.containsKey("contents")) {
-            existBook.updateBookInfo(null, (String) payload.get("contents"), null, null, null, null, null, null);
-        }
-        if (payload.containsKey("author")) {
-            existBook.updateBookInfo(null, null, (String) payload.get("author"), null, null, null, null, null);
-        }
-        if (payload.containsKey("publisher")) {
-            existBook.updateBookInfo(null, null, null, (String) payload.get("publisher"), null, null, null, null);
-        }
-        if (payload.containsKey("thumbnail")) {
-            existBook.updateBookInfo(null, null, null, null, (String) payload.get("thumbnail"), null, null, null);
-        }
-        if (payload.containsKey("bestbook")) {
-            existBook.updateBookInfo(null, null, null, null, null, null, (Boolean) payload.get("bestbook"), null);
-        }
-        if (payload.containsKey("aiReview") || payload.containsKey("ai_review")) {
-            String review = (String) (payload.containsKey("aiReview") ? payload.get("aiReview") : payload.get("ai_review"));
-            existBook.updateBookInfo(null, null, null, null, null, null, null, review);
-        }
+        String title = (String) payload.get("title");
+        String contents = (String) payload.get("contents");
+        String author = (String) payload.get("author");
+        String publisher = (String) payload.get("publisher");
+        String thumbnail = (String) payload.get("thumbnail");
+        Boolean bestbook = (Boolean) payload.get("bestbook");
+        String aiReview = (String) (payload.containsKey("aiReview") ? payload.get("aiReview") : payload.get("ai_review"));
+
+        existBook.updateBookInfo(title, contents, author, publisher, thumbnail, null, bestbook, aiReview);
 
         // 대출/반납 상태 처리
         if (payload.containsKey("isAvailable") || payload.containsKey("is_available")) {
@@ -166,7 +153,7 @@ public class BookService {
             }
         }
 
-        return bookRepository.save(existBook);
+        return existBook;
     }
 
     // 책 삭제
