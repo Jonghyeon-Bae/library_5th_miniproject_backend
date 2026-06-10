@@ -46,15 +46,17 @@ public class BookController {
     public ResponseEntity<PageResponseDto<BookResponseDto>> getBooks(
             @RequestParam(name = "page", defaultValue = "0") int page,
             @RequestParam(name = "size", defaultValue = "10") int size,
+            @RequestParam(name = "sort", defaultValue = "-created") String sort,
             @RequestParam(name = "keyword", required = false) String keyword) {
 
-        // 1. Service에서 Page<Book> 엔티티 결과를 가져옴
-        Page<Book> bookPage = bookService.getPage(page, size, "createdAt");
+        Page<Book> bookPage;
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            bookPage = bookService.searchBooks(keyword, page, size, sort);
+        } else {
+            bookPage = bookService.getPage(page, size, sort);
+        }
 
-        // 2. Page<Book> 엔티티 내부의 내용물들을 BookResponseDto로 싹 변환 (.map 활용)
         Page<BookResponseDto> dtoPage = bookPage.map(book -> new BookResponseDto(book));
-
-        // 3. 변환된 데이터를 우리가 만든 커스텀 래퍼로 감싸서 반환
         PageResponseDto<BookResponseDto> response = new PageResponseDto<>(dtoPage);
 
         return ResponseEntity.ok(response);
