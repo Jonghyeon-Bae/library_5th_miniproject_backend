@@ -87,15 +87,20 @@ public class BookService {
 
     // 책 수정
     @Transactional
-    public Book updateBook(Long id,Book book){
+    public Book updateBook(Long id, Book book){
         Book existBook = findById(id);
-        if(book.getTitle()!=null){
-            existBook.setTitle(book.getTitle());
-        }
-        if(book.getAuthor()!=null){
-            existBook.setAuthor(book.getAuthor());
-        }
-        return bookRepository.save(existBook);
+
+        existBook.updateBook(
+                book.getTitle(),
+                book.getContents(),
+                book.getAuthor(),
+                book.getPublisher(),
+                book.getThumbnail(),
+                book.getIs_available(),
+                book.getBestbook(),
+                book.getAi_review()
+        );
+        return existBook;
     }
     // 책 삭제
     @Transactional
