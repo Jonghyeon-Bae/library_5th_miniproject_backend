@@ -37,9 +37,10 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/auth/**").permitAll()
                 // .requestMatchers("/h2-console/**").permitAll()
-                .anyRequest().authenticated() // Temporary permit all to allow other API developers to work, but let's change to permitAll or authenticated based on needs. Let's make it permitAll for now or authenticated? Let's check: it's better to keep it permitAll for H2/Auth and authenticated for others, but wait! Since they are working as a team, we can make it authenticated, but if it blocks them, we can explain. Let's require authentication for non-auth requests but allow /books as public? Usually books search should be public but borrow / like should be authenticated. For now, let's keep it .anyRequest().permitAll() or .anyRequest().authenticated()? Let's do authenticated, it is the most standard, and they can add paths to permitAll if they want. Let's write anyRequest().authenticated().
+                // .requestMatchers("/api/auth/**").permitAll()
+                // .anyRequest().authenticated() // Temporary permit all to allow other API developers to work, but let's change to permitAll or authenticated based on needs. Let's make it permitAll for now or authenticated? Let's check: it's better to keep it permitAll for H2/Auth and authenticated for others, but wait! Since they are working as a team, we can make it authenticated, but if it blocks them, we can explain. Let's require authentication for non-auth requests but allow /books as public? Usually books search should be public but borrow / like should be authenticated. For now, let's keep it .anyRequest().permitAll() or .anyRequest().authenticated()? Let's do authenticated, it is the most standard, and they can add paths to permitAll if they want. Let's write anyRequest().authenticated().
+                .anyRequest().permitAll() // 임시로 모든 요청 허용
             )
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
