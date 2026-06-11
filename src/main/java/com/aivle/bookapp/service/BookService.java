@@ -13,6 +13,7 @@ import com.aivle.bookapp.domain.Book;
 import com.aivle.bookapp.exception.BookNotFoundException;
 import com.aivle.bookapp.repository.BookRepository;
 import com.aivle.bookapp.repository.UsersRepository;
+import com.aivle.bookapp.dto.BookRequestDto;
 
 import lombok.RequiredArgsConstructor;
 import java.util.Map;
@@ -104,6 +105,47 @@ public class BookService {
     // 책 생성
     @Transactional
     public Book createBook(Book book) {
+        return bookRepository.save(book);
+    }
+
+    // 추가_종현_02 BookRequestDto를 이용하여 책 생성 시 User 관계를 올바르게 매핑
+    @Transactional
+    public Book createBook(BookRequestDto dto) {
+        com.aivle.bookapp.domain.User user = null;
+        if (dto.getUserId() != null) {
+            user = usersRepository.findById(dto.getUserId())
+                    .orElseThrow(() -> new IllegalArgumentException("User not found with id: " + dto.getUserId()));
+        } else {
+            throw new IllegalArgumentException("User ID is required to register a book.");
+        }
+
+        Book book = Book.builder()
+                .user(user)
+                .title(dto.getTitle())
+                .author(dto.getAuthor())
+                .publisher(dto.getPublisher())
+                .thumbnail(dto.getThumbnail())
+                .category(dto.getCategory())
+                .contents(dto.getContents())
+                .isbn13(dto.getIsbn13())
+                .build();
+
+        if (dto.getIsAvailable() != null) {
+            if (dto.getIsAvailable()) {
+                book.returnBook();
+            } else {
+                book.borrowBook(null);
+            }
+        }
+        
+        if (dto.getBestbook() != null && dto.getBestbook()) {
+            book.updateBookInfo(null, null, null, null, null, null, true, null);
+        }
+
+        if (dto.getAiReview() != null) {
+            book.updateBookInfo(null, null, null, null, null, null, null, dto.getAiReview());
+        }
+
         return bookRepository.save(book);
     }
 

@@ -6,6 +6,7 @@ import java.util.Map;
 
 import com.aivle.bookapp.dto.BookResponseDto;
 import com.aivle.bookapp.dto.PageResponseDto;
+import com.aivle.bookapp.dto.BookRequestDto;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -124,9 +125,10 @@ public class BookController {
 //    }
 
     // [소한민] 신규 도서 등록 Location header 및 body 반영
+    // 수정_종현_03 BookRequestDto를 통해 유저 매핑 관계를 적용한 신규 등록
     @PostMapping
-    public ResponseEntity<Map<String, Object>> createBook(@Valid @RequestBody Book book) {
-        Book saved = bookService.createBook(book);
+    public ResponseEntity<Map<String, Object>> createBook(@Valid @RequestBody BookRequestDto bookDto) {
+        Book saved = bookService.createBook(bookDto);
 
         // Location 헤더 생성
         URI location = ServletUriComponentsBuilder.fromCurrentRequest()
