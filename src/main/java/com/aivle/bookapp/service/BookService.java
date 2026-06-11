@@ -1,12 +1,8 @@
 package com.aivle.bookapp.service;
 
 import java.util.List;
+import java.util.Map;
 
-import com.aivle.bookapp.domain.User;
-import com.aivle.bookapp.dto.BookCreateRequestDto;
-import com.aivle.bookapp.exception.BookAlreadyExistsException;
-import com.aivle.bookapp.exception.UnauthorizedAccessException;
-import com.aivle.bookapp.exception.UserNotFoundException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -15,12 +11,16 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.aivle.bookapp.domain.Book;
+import com.aivle.bookapp.domain.User;
+import com.aivle.bookapp.dto.BookCreateRequestDto;
+import com.aivle.bookapp.exception.BookAlreadyExistsException;
 import com.aivle.bookapp.exception.BookNotFoundException;
+import com.aivle.bookapp.exception.UnauthorizedAccessException;
+import com.aivle.bookapp.exception.UserNotFoundException;
 import com.aivle.bookapp.repository.BookRepository;
 import com.aivle.bookapp.repository.UsersRepository;
 
 import lombok.RequiredArgsConstructor;
-import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -113,9 +113,11 @@ public class BookService {
         User user = usersRepository.findByEmail(userEmail)
                 .orElseThrow(() -> new UserNotFoundException(userEmail));
 
-        // ISBN 중복 확인
-        if (bookRepository.existsByIsbn13(dto.getIsbn13())) {
-            throw new BookAlreadyExistsException(dto.getIsbn13());
+        // ISBN 중복 확인 (ISBN이 제공된 경우에만 중복 확인 수행)
+        if (dto.getIsbn13() != null && !dto.getIsbn13().trim().isEmpty()) {
+            if (bookRepository.existsByIsbn13(dto.getIsbn13())) {
+                throw new BookAlreadyExistsException(dto.getIsbn13());
+            }
         }
 
         //DTO가 스스로 엔티티로 변환
@@ -124,6 +126,7 @@ public class BookService {
         // 저장
         return bookRepository.save(book);
     }
+
     // 책 수정
     @Transactional
     public Book updateBook(Long id, Map<String, Object> payload) {
@@ -178,8 +181,8 @@ public class BookService {
     public Book deleteBook(Long id, String userEmail) { // userEmail 파라미터 추가
         Book book = findById(id);
 
-        // 권한 검증: 책을 등록한 유저의 이메일과 요청한 유저의 이메일이 다르면 예외 발생
-        if (!book.getUser().getEmail().equals(userEmail)) {
+        // 권한 검증: 책을 등록한 유저가 존재하고, 이메일이 다르면 예외 발생 (수정_종현_05 유저 널 가드 추가)
+        if (book.getUser() != null && !book.getUser().getEmail().equals(userEmail)) {
             throw new UnauthorizedAccessException();
         }
 
@@ -322,8 +325,8 @@ public class BookService {
     public Book updateCover(Long id, String coverDataUrl, String userEmail) { // userEmail 파라미터 추가
         Book book = findById(id);
 
-        // 권한 검증: 본인이 등록한 책만 표지를 바꿀 수 있음
-        if (!book.getUser().getEmail().equals(userEmail)) {
+        // 권한 검증: 본인이 등록한 책만 표지를 바꿀 수 있음 (수정_종현_05 유저 널 가드 추가)
+        if (book.getUser() != null && !book.getUser().getEmail().equals(userEmail)) {
             throw new UnauthorizedAccessException();
         }
 
