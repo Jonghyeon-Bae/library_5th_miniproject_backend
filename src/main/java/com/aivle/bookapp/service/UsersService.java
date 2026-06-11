@@ -1,6 +1,7 @@
 package com.aivle.bookapp.service;
 
 import com.aivle.bookapp.domain.User;
+import com.aivle.bookapp.exception.UserNotFoundException;
 import com.aivle.bookapp.repository.UsersRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -19,7 +20,7 @@ public class UsersService {
     public User findById(Long id){
         return usersRepository.findById(id)
                 .orElseThrow(() ->
-                        new RuntimeException(id + "를 가진 유저를 찾을 수 없습니다."));
+                        new UserNotFoundException(id));
     }
 
     // 전체 회원 조회
@@ -41,8 +42,7 @@ public class UsersService {
     @Transactional(readOnly = true)
     public User findByEmail(String email){
         return usersRepository.findByEmail(email)
-                .orElseThrow(() ->
-                        new RuntimeException(email + "를 가진 유저를 찾을 수 없습니다."));
+                .orElseThrow(() -> new UserNotFoundException(email));
     }
 
     // 프로필 수정
@@ -96,7 +96,7 @@ public class UsersService {
 
         User user = findById(userId);
 
-        user.updateAvatar(avatarUrl);
+        user.updateProfile(null, avatarUrl, null);
 
         return user;
     }

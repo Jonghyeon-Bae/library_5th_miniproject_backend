@@ -5,6 +5,8 @@ import com.aivle.bookapp.dto.LoginRequest;
 import com.aivle.bookapp.dto.SignUpRequest;
 import com.aivle.bookapp.dto.TokenResponse;
 import com.aivle.bookapp.config.security.JwtTokenProvider;
+import com.aivle.bookapp.exception.EmailAlreadyExistsException;
+import com.aivle.bookapp.exception.InvalidCredentialsException;
 import com.aivle.bookapp.repository.UsersRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -21,8 +23,9 @@ public class AuthService {
 
     @Transactional
     public User signUp(SignUpRequest request) {
+        //수정 :  커스텀 예외 사용 (GlobalExceptionHandler가 409 Conflict로 처리함)
         if (usersRepository.existsByEmail(request.getEmail())) {
-            throw new RuntimeException("Email is already in use");
+            throw new EmailAlreadyExistsException(request.getEmail());
         }
 
         User user = User.builder()
@@ -40,10 +43,12 @@ public class AuthService {
     @Transactional(readOnly = true)
     public TokenResponse login(LoginRequest request) {
         User user = usersRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new RuntimeException("Invalid email or password"));
+                // 수정 : 401 Unauthorized 처리
+                .orElseThrow(() -> new InvalidCredentialsException());
 
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
-            throw new RuntimeException("Invalid email or password");
+            // 수정
+            throw new InvalidCredentialsException();
         }
 
         String token = jwtTokenProvider.createToken(user.getEmail());

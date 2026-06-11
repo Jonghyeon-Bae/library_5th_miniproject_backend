@@ -2,6 +2,7 @@ package com.aivle.bookapp.service;
 
 import com.aivle.bookapp.domain.SearchHistory;
 import com.aivle.bookapp.domain.User;
+import com.aivle.bookapp.exception.UserNotFoundException;
 import com.aivle.bookapp.repository.SearchHistoryRepository;
 import com.aivle.bookapp.repository.UsersRepository;
 import lombok.RequiredArgsConstructor;
@@ -25,7 +26,7 @@ public class SearchHistoryService {
     @Transactional
     public SearchHistory createSearchHistory(Long userId, String keyword) {
         User user = usersRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("User not found: " + userId));
+                .orElseThrow(() -> new UserNotFoundException(userId));
 
         // 동일 키워드 있을 경우 삭제
         searchHistoryRepository.deleteByUserIdAndKeyword(userId, keyword);
@@ -44,17 +45,12 @@ public class SearchHistoryService {
                 .findAllByUserIdOrderByCreatedAtDesc(userId);
     }
 
-    // 특정 사용자의 검색 기록 전체 삭제 (추가B-1)
+    // 특정 사용자의 검색 기록 전체 삭제
     @Transactional
-    public long deleteAllHistory(Long userId) {
-
+    public void deleteAllHistory(Long userId) {
         usersRepository.findById(userId)
-                .orElseThrow(() ->
-                        new IllegalArgumentException(
-                                "User not found: " + userId
-                        )
-                );
+                .orElseThrow(() -> new UserNotFoundException(userId));
 
-        return searchHistoryRepository.deleteAllByUserId(userId);
+        searchHistoryRepository.deleteAllByUserId(userId);
     }
 }

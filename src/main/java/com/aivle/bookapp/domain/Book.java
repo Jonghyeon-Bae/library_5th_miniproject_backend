@@ -114,6 +114,10 @@ public class Book {
         this.isAvailable = true;
         this.borrower = null;
     }
+    // AI 썸네일만 전용으로 업데이트하는 메서드
+    public void updateThumbnail(String thumbnail) {
+        this.thumbnail = thumbnail;
+    }
 
     // 책의 메타 정보를 수정할 때 사용
     public void updateBookInfo(String title, String contents, String author,
