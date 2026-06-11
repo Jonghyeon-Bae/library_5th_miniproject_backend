@@ -1,6 +1,7 @@
 package com.aivle.bookapp.service;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -10,13 +11,17 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.aivle.bookapp.domain.Book;
+import com.aivle.bookapp.domain.User;
+import com.aivle.bookapp.dto.BookCreateRequestDto;
+import com.aivle.bookapp.dto.BookRequestDto;
+import com.aivle.bookapp.exception.BookAlreadyExistsException;
 import com.aivle.bookapp.exception.BookNotFoundException;
+import com.aivle.bookapp.exception.UnauthorizedAccessException;
+import com.aivle.bookapp.exception.UserNotFoundException;
 import com.aivle.bookapp.repository.BookRepository;
 import com.aivle.bookapp.repository.UsersRepository;
-import com.aivle.bookapp.dto.BookRequestDto;
 
 import lombok.RequiredArgsConstructor;
-import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -104,7 +109,20 @@ public class BookService {
 
     // 책 생성
     @Transactional
-    public Book createBook(Book book) {
+    public Book createBook(BookCreateRequestDto dto, String userEmail) {
+        //유저 찾기
+        User user = usersRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new UserNotFoundException(userEmail));
+
+        // ISBN 중복 확인
+        if (bookRepository.existsByIsbn13(dto.getIsbn13())) {
+            throw new BookAlreadyExistsException(dto.getIsbn13());
+        }
+
+        //DTO가 스스로 엔티티로 변환
+        Book book = dto.toEntity(user);
+
+        // 저장
         return bookRepository.save(book);
     }
 
@@ -154,28 +172,15 @@ public class BookService {
     public Book updateBook(Long id, Map<String, Object> payload) {
         Book existBook = findById(id);
 
-        if (payload.containsKey("title")) {
-            existBook.updateBookInfo((String) payload.get("title"), null, null, null, null, null, null, null);
-        }
-        if (payload.containsKey("contents")) {
-            existBook.updateBookInfo(null, (String) payload.get("contents"), null, null, null, null, null, null);
-        }
-        if (payload.containsKey("author")) {
-            existBook.updateBookInfo(null, null, (String) payload.get("author"), null, null, null, null, null);
-        }
-        if (payload.containsKey("publisher")) {
-            existBook.updateBookInfo(null, null, null, (String) payload.get("publisher"), null, null, null, null);
-        }
-        if (payload.containsKey("thumbnail")) {
-            existBook.updateBookInfo(null, null, null, null, (String) payload.get("thumbnail"), null, null, null);
-        }
-        if (payload.containsKey("bestbook")) {
-            existBook.updateBookInfo(null, null, null, null, null, null, (Boolean) payload.get("bestbook"), null);
-        }
-        if (payload.containsKey("aiReview") || payload.containsKey("ai_review")) {
-            String review = (String) (payload.containsKey("aiReview") ? payload.get("aiReview") : payload.get("ai_review"));
-            existBook.updateBookInfo(null, null, null, null, null, null, null, review);
-        }
+        String title = (String) payload.get("title");
+        String contents = (String) payload.get("contents");
+        String author = (String) payload.get("author");
+        String publisher = (String) payload.get("publisher");
+        String thumbnail = (String) payload.get("thumbnail");
+        Boolean bestbook = (Boolean) payload.get("bestbook");
+        String aiReview = (String) (payload.containsKey("aiReview") ? payload.get("aiReview") : payload.get("ai_review"));
+
+        existBook.updateBookInfo(title, contents, author, publisher, thumbnail, null, bestbook, aiReview);
 
         // 대출/반납 상태 처리
         if (payload.containsKey("isAvailable") || payload.containsKey("is_available")) {
@@ -208,13 +213,19 @@ public class BookService {
             }
         }
 
-        return bookRepository.save(existBook);
+        return existBook;
     }
 
-    // 책 삭제
+    // 책 삭제(권한 검증 추가)
     @Transactional
-    public Book deleteBook(Long id) {
+    public Book deleteBook(Long id, String userEmail) { // userEmail 파라미터 추가
         Book book = findById(id);
+
+        // 권한 검증: 책을 등록한 유저의 이메일과 요청한 유저의 이메일이 다르면 예외 발생
+        if (!book.getUser().getEmail().equals(userEmail)) {
+            throw new UnauthorizedAccessException();
+        }
+
         bookRepository.delete(book);
         return book;
     }
@@ -304,6 +315,12 @@ public class BookService {
                 pageable
         );
     }
+    // 내가 대출한 책 목록 조회
+    @Transactional(readOnly = true)
+    public Page<Book> getPageByBorrowerId(Long borrowerId, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("updatedAt").descending());
+        return bookRepository.findByBorrowerId(borrowerId, pageable);
+    }
 
     // 내가 대출한 책 개수 조회
     @Transactional(readOnly = true)
@@ -343,12 +360,18 @@ public class BookService {
         return bookRepository.countByIsAvailableFalse();
     }
 
-    // 표지 이미지 업데이트
+    // AI 표지 업데이트 (권한 검증 추가)
     @Transactional
-    public Book updateCover(Long id, String coverDataUrl) {
-        Book existBook = findById(id);
-        existBook.updateBookInfo(null, null, null, null, coverDataUrl, null, null, null);
-        return bookRepository.save(existBook);
+    public Book updateCover(Long id, String coverDataUrl, String userEmail) { // userEmail 파라미터 추가
+        Book book = findById(id);
+
+        // 권한 검증: 본인이 등록한 책만 표지를 바꿀 수 있음
+        if (!book.getUser().getEmail().equals(userEmail)) {
+            throw new UnauthorizedAccessException();
+        }
+
+        book.updateThumbnail(coverDataUrl);
+        return book;
     }
 }
 

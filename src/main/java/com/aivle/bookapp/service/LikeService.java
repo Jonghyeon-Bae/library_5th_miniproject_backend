@@ -2,6 +2,7 @@ package com.aivle.bookapp.service;
 
 import java.util.List;
 
+import com.aivle.bookapp.exception.UserNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,13 +31,15 @@ public class LikeService {
     @Transactional
     public void likeBook(Long bookId, String email) {
         User user = usersRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다. email: " + email));
+                .orElseThrow(() -> new UserNotFoundException(email));
         
         Book book = bookRepository.findById(bookId)
                 .orElseThrow(() -> new BookNotFoundException(bookId));
 
         if (likeRepository.existsByBookIdAndUserId(bookId, user.getId())) {
-            throw new RuntimeException("이미 좋아요를 누른 도서입니다.");
+            // 변경: 중복 좋아요 방지 (409 Conflict)
+            throw new RuntimeException("Like already exists: bookId=" + bookId);
+            // (참고: LikeAlreadyExistsException 생성자 파라미터에 맞게 수정하셔도 좋습니다)
         }
 
         Like like = Like.builder()
@@ -54,7 +57,7 @@ public class LikeService {
     @Transactional
     public void unlikeBook(Long bookId, String email) {
         User user = usersRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다. email: " + email));
+                .orElseThrow(() -> new UserNotFoundException(email));
 
         Book book = bookRepository.findById(bookId)
                 .orElseThrow(() -> new BookNotFoundException(bookId));
@@ -72,7 +75,7 @@ public class LikeService {
     @Transactional(readOnly = true)
     public LikeStatusResponse getLikeStatus(Long bookId, String email) {
         User user = usersRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다. email: " + email));
+                .orElseThrow(() -> new UserNotFoundException(email));
 
         Book book = bookRepository.findById(bookId)
                 .orElseThrow(() -> new BookNotFoundException(bookId));
@@ -91,12 +94,38 @@ public class LikeService {
     @Transactional(readOnly = true)
     public List<Book> getLikedBooks(String email) {
         User user = usersRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다. email: " + email));
+                .orElseThrow(() -> new UserNotFoundException(email));
 
         List<Like> likesList = likeRepository.findByUserId(user.getId());
         
         return likesList.stream()
                 .map(Like::getBook)
                 .toList();
+    }
+
+    // 특정 도서 좋아요 개수 조회
+    @Transactional(readOnly = true)
+    public long getLikeCount(Long bookId) {
+
+        bookRepository.findById(bookId)
+                .orElseThrow(() -> new BookNotFoundException(bookId));
+
+        return likeRepository.countByBookId(bookId);
+    }
+
+    // 특정 사용자의 특정 도서 좋아요 취소
+    @Transactional
+    public void cancelLike(Long bookId, Long userId) {
+
+        if (!likeRepository.existsByBookIdAndUserId(bookId, userId)) {
+            throw new RuntimeException("좋아요 기록이 존재하지 않습니다.");
+        }
+
+        Book book = bookRepository.findById(bookId)
+                .orElseThrow(() -> new BookNotFoundException(bookId));
+
+        likeRepository.deleteByBookIdAndUserId(bookId, userId);
+
+        book.decreaseLikeCount();
     }
 }

@@ -1,6 +1,7 @@
 package com.aivle.bookapp.service;
 
 import com.aivle.bookapp.domain.User;
+import com.aivle.bookapp.exception.UserNotFoundException;
 import com.aivle.bookapp.repository.UsersRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -19,7 +20,7 @@ public class UsersService {
     public User findById(Long id){
         return usersRepository.findById(id)
                 .orElseThrow(() ->
-                        new RuntimeException(id + "를 가진 유저를 찾을 수 없습니다."));
+                        new UserNotFoundException(id));
     }
 
     // 전체 회원 조회
@@ -28,21 +29,20 @@ public class UsersService {
         return usersRepository.findAll();
     }
 
-    // 회원가입
-    @Transactional
-    public User createUser(User user){
-        if(usersRepository.existsByEmail(user.getEmail())){
-            throw new RuntimeException("이미 존재하는 이메일입니다.");
-        }
-        return usersRepository.save(user);
-    }
+    // // 회원가입
+    // @Transactional
+    // public User createUser(User user){
+    //     if(usersRepository.existsByEmail(user.getEmail())){
+    //         throw new RuntimeException("이미 존재하는 이메일입니다.");
+    //     }
+    //     return usersRepository.save(user);
+    // }
 
     // 이메일로 회원 찾기
     @Transactional(readOnly = true)
     public User findByEmail(String email){
         return usersRepository.findByEmail(email)
-                .orElseThrow(() ->
-                        new RuntimeException(email + "를 가진 유저를 찾을 수 없습니다."));
+                .orElseThrow(() -> new UserNotFoundException(email));
     }
 
     // 프로필 수정
@@ -96,7 +96,7 @@ public class UsersService {
 
         User user = findById(userId);
 
-        user.updateAvatar(avatarUrl);
+        user.updateProfile(null, avatarUrl, null);
 
         return user;
     }
@@ -128,5 +128,48 @@ public class UsersService {
     public String getCount(){
 
         return String.valueOf(usersRepository.count());
+    }
+
+    // 이메일 중복 여부 확인
+    @Transactional(readOnly = true)
+    public boolean existsByEmail(String email){
+        return usersRepository.existsByEmail(email);
+    }
+
+    // 이메일 인증 여부 조회
+    @Transactional(readOnly = true)
+    public boolean isVerified(Long userId){
+
+        User user = findById(userId);
+
+        return Boolean.TRUE.equals(user.getVerified());
+    }
+
+    // 이메일 공개 여부 조회
+    @Transactional(readOnly = true)
+    public boolean getEmailVisibility(Long userId){
+
+        User user = findById(userId);
+
+        return Boolean.TRUE.equals(
+                user.getEmailVisibility()
+        );
+    }
+
+    // 회원 존재 여부 확인
+    @Transactional(readOnly = true)
+    public boolean existsById(Long userId){
+        return usersRepository.existsById(userId);
+    }
+
+    // 이메일로 회원 삭제
+    @Transactional
+    public User deleteUserByEmail(String email){
+
+        User user = findByEmail(email);
+
+        usersRepository.delete(user);
+
+        return user;
     }
 }
