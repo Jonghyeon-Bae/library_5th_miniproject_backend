@@ -42,7 +42,17 @@ public class AuthService {
         User user = usersRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new RuntimeException("Invalid email or password"));
 
-        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+        String currentDbPassword = user.getPassword();
+        boolean isMatched = false;
+
+        // BCrypt 해시 형식인 경우 matches 사용, 그렇지 않은 경우 평문 비교 (하이브리드 대응)
+        if (currentDbPassword != null && (currentDbPassword.startsWith("$2a$") || currentDbPassword.startsWith("$2b$") || currentDbPassword.startsWith("$2y$"))) {
+            isMatched = passwordEncoder.matches(request.getPassword(), currentDbPassword);
+        } else {
+            isMatched = request.getPassword().equals(currentDbPassword);
+        }
+
+        if (!isMatched) {
             throw new RuntimeException("Invalid email or password");
         }
 
@@ -56,5 +66,47 @@ public class AuthService {
                 .avatar(user.getAvatar())
                 .createdAt(user.getCreatedAt())
                 .build();
+    }
+
+    @Transactional
+    public User updateProfile(String email, com.aivle.bookapp.dto.UpdateProfileRequest request) {
+        User user = usersRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        System.out.println("[DEBUG] email: " + email);
+        System.out.println("[DEBUG] request name: " + request.getName());
+        System.out.println("[DEBUG] request currentPassword: [" + request.getCurrentPassword() + "]");
+        System.out.println("[DEBUG] request newPassword: [" + request.getNewPassword() + "]");
+        System.out.println("[DEBUG] DB password: [" + user.getPassword() + "]");
+
+        // 이름 변경 (입력값이 있을 때만 변경)
+        if (request.getName() != null && !request.getName().trim().isEmpty()) {
+            user.updateProfile(request.getName(), user.getAvatar(), user.getEmailVisibility());
+        }
+
+        // 비밀번호 변경
+        if (request.getNewPassword() != null && !request.getNewPassword().trim().isEmpty()) {
+            if (request.getCurrentPassword() == null || request.getCurrentPassword().trim().isEmpty()) {
+                throw new RuntimeException("Current password is required to change password");
+            }
+            
+            String currentDbPassword = user.getPassword();
+            boolean isMatched = false;
+
+            // BCrypt 해시 형식인 경우 matches 사용, 그렇지 않은 경우 평문 비교 (하이브리드 대응)
+            if (currentDbPassword != null && (currentDbPassword.startsWith("$2a$") || currentDbPassword.startsWith("$2b$") || currentDbPassword.startsWith("$2y$"))) {
+                isMatched = passwordEncoder.matches(request.getCurrentPassword(), currentDbPassword);
+            } else {
+                isMatched = request.getCurrentPassword().equals(currentDbPassword);
+            }
+
+            System.out.println("[DEBUG] matches result: " + isMatched);
+            if (!isMatched) {
+                throw new RuntimeException("Current password does not match");
+            }
+            user.changePassword(passwordEncoder.encode(request.getNewPassword()));
+        }
+
+        return user;
     }
 }
