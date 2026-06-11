@@ -45,7 +45,7 @@ public class SearchHistoryService {
                 .findAllByUserIdOrderByCreatedAtDesc(userId);
     }
 
-    // 특정 사용자의 검색 기록 전체 삭제
+    // 특정 사용자의 검색 기록 전체 삭제(type -> long)
     @Transactional
     public void deleteAllHistory(Long userId) {
         usersRepository.findById(userId)
