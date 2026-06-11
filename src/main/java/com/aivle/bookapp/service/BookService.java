@@ -178,7 +178,7 @@ public class BookService {
     public Book deleteBook(Long id, String userEmail) { // userEmail 파라미터 추가
         Book book = findById(id);
 
-        // 권한 검증: 책을 등록한 유저의 이메일과 요청한 유저의 이메일이 다르면 예외 발생!
+        // 권한 검증: 책을 등록한 유저의 이메일과 요청한 유저의 이메일이 다르면 예외 발생
         if (!book.getUser().getEmail().equals(userEmail)) {
             throw new UnauthorizedAccessException();
         }
