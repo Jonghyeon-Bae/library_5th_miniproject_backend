@@ -60,11 +60,13 @@
   - `/api/users/me/avatar` (PATCH): 아바타 사진 변경
 * **독립성**: 기존 `UsersService`에 비즈니스 로직(프로필 수정 등)이 이미 구현되어 있어 Controller 및 인증 연동만 완성하면 됨
 
-### 4) 배포 환경 최적화 (Profiles 분리)
-* **역할**: 로컬 개발(H2 또는 로컬 MySQL)과 배포(Aiven MySQL) 환경의 설정을 빌드 시점이나 기동 시점에 다르게 적용하기 위한 프로파일 분리
-* **작업**:
-  - `application-local.yaml` 및 `application-prod.yaml` 분리 설정
-  - Docker 배포용 `Dockerfile` 작성
+### 4) 배포 환경 최적화 (Profiles 분리 및 단일 배포 브랜치 전략) [의사결정 완료]
+* **역할**: 로컬 개발(H2 DB)과 배포(Aiven MySQL) 환경 설정을 분리하여 코드 변경 없이 유연한 기동 보장
+* **합의된 작업 및 의사결정**:
+  - **단일 브랜치 배포:** `Deploy` 브랜치를 별도로 분리하지 않고 `main` 단일 브랜치로 소스코드를 통일하여 관리 및 배포(머지 충돌 및 코드 유실 방지).
+  - **프로파일 분리:** `application-local.yaml`(H2 기반 로컬 개발)과 `application-prod.yaml`(Aiven MySQL 기반 클라우드 배포)로 스프링 프로파일을 구분.
+  - **배포 연동:** Render 서비스 배포 환경변수 설정에 `SPRING_PROFILES_ACTIVE=prod`를 주입하여 런타임에 동적으로 prod 환경을 바인딩함.
+  - **CORS 연동:** `WebConfig.java`에서 로컬 호스트(`http://localhost:3000`)와 Render 프론트 도메인을 둘 다 `allowedOrigins`에 명시하여 로컬과 배포 환경 모두에서 접속 가능하도록 처리.
 
 ---
 
