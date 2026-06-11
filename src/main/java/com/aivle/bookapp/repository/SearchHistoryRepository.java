@@ -12,9 +12,9 @@ public interface SearchHistoryRepository
     // 특정 사용자의 검색 기록 조회
     List<SearchHistory> findByUserId(Long userId);
 
-    // 특정 사용자의 검색 기록 전체 삭제
+    // 특정 사용자의 검색 기록 전체 삭제 (수정B-3)
     @Transactional
-    void deleteAllByUserId(Long userId);
+    long deleteAllByUserId(Long userId);
 
     // 로그인한 사용자의 최근 검색어 5개를 최신순으로 조회
     List<SearchHistory> findTop5ByUserIdOrderByCreatedAtDesc(Long userId);
