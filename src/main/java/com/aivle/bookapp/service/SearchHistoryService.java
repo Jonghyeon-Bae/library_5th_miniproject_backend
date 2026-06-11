@@ -53,4 +53,13 @@ public class SearchHistoryService {
 
         return searchHistoryRepository.deleteAllByUserId(userId);
     }
+
+    // 특정 사용자의 특정 검색 기록 삭제 (B2)
+    @Transactional
+    public void deleteHistory(Long userId, String keyword) {
+        usersRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException(userId));
+        
+        searchHistoryRepository.deleteByUserIdAndKeyword(userId,keyword);
+    }
 }
