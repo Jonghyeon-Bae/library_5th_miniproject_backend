@@ -13,7 +13,6 @@ import org.springframework.transaction.annotation.Transactional;
 import com.aivle.bookapp.domain.Book;
 import com.aivle.bookapp.domain.User;
 import com.aivle.bookapp.dto.BookCreateRequestDto;
-import com.aivle.bookapp.dto.BookRequestDto;
 import com.aivle.bookapp.exception.BookAlreadyExistsException;
 import com.aivle.bookapp.exception.BookNotFoundException;
 import com.aivle.bookapp.exception.UnauthorizedAccessException;
@@ -114,56 +113,17 @@ public class BookService {
         User user = usersRepository.findByEmail(userEmail)
                 .orElseThrow(() -> new UserNotFoundException(userEmail));
 
-        // ISBN 중복 확인
-        if (bookRepository.existsByIsbn13(dto.getIsbn13())) {
-            throw new BookAlreadyExistsException(dto.getIsbn13());
+        // ISBN 중복 확인 (ISBN이 제공된 경우에만 중복 확인 수행)
+        if (dto.getIsbn13() != null && !dto.getIsbn13().trim().isEmpty()) {
+            if (bookRepository.existsByIsbn13(dto.getIsbn13())) {
+                throw new BookAlreadyExistsException(dto.getIsbn13());
+            }
         }
 
         //DTO가 스스로 엔티티로 변환
         Book book = dto.toEntity(user);
 
         // 저장
-        return bookRepository.save(book);
-    }
-
-    // 추가_종현_02 BookRequestDto를 이용하여 책 생성 시 User 관계를 올바르게 매핑
-    @Transactional
-    public Book createBook(BookRequestDto dto) {
-        com.aivle.bookapp.domain.User user = null;
-        if (dto.getUserId() != null) {
-            user = usersRepository.findById(dto.getUserId())
-                    .orElseThrow(() -> new IllegalArgumentException("User not found with id: " + dto.getUserId()));
-        } else {
-            throw new IllegalArgumentException("User ID is required to register a book.");
-        }
-
-        Book book = Book.builder()
-                .user(user)
-                .title(dto.getTitle())
-                .author(dto.getAuthor())
-                .publisher(dto.getPublisher())
-                .thumbnail(dto.getThumbnail())
-                .category(dto.getCategory())
-                .contents(dto.getContents())
-                .isbn13(dto.getIsbn13())
-                .build();
-
-        if (dto.getIsAvailable() != null) {
-            if (dto.getIsAvailable()) {
-                book.returnBook();
-            } else {
-                book.borrowBook(null);
-            }
-        }
-        
-        if (dto.getBestbook() != null && dto.getBestbook()) {
-            book.updateBookInfo(null, null, null, null, null, null, true, null);
-        }
-
-        if (dto.getAiReview() != null) {
-            book.updateBookInfo(null, null, null, null, null, null, null, dto.getAiReview());
-        }
-
         return bookRepository.save(book);
     }
 
@@ -221,8 +181,8 @@ public class BookService {
     public Book deleteBook(Long id, String userEmail) { // userEmail 파라미터 추가
         Book book = findById(id);
 
-        // 권한 검증: 책을 등록한 유저의 이메일과 요청한 유저의 이메일이 다르면 예외 발생
-        if (!book.getUser().getEmail().equals(userEmail)) {
+        // 권한 검증: 책을 등록한 유저가 존재하고, 이메일이 다르면 예외 발생 (수정_종현_05 유저 널 가드 추가)
+        if (book.getUser() != null && !book.getUser().getEmail().equals(userEmail)) {
             throw new UnauthorizedAccessException();
         }
 
@@ -365,8 +325,8 @@ public class BookService {
     public Book updateCover(Long id, String coverDataUrl, String userEmail) { // userEmail 파라미터 추가
         Book book = findById(id);
 
-        // 권한 검증: 본인이 등록한 책만 표지를 바꿀 수 있음
-        if (!book.getUser().getEmail().equals(userEmail)) {
+        // 권한 검증: 본인이 등록한 책만 표지를 바꿀 수 있음 (수정_종현_05 유저 널 가드 추가)
+        if (book.getUser() != null && !book.getUser().getEmail().equals(userEmail)) {
             throw new UnauthorizedAccessException();
         }
 

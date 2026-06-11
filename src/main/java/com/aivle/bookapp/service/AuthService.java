@@ -7,6 +7,7 @@ import com.aivle.bookapp.dto.TokenResponse;
 import com.aivle.bookapp.config.security.JwtTokenProvider;
 import com.aivle.bookapp.exception.EmailAlreadyExistsException;
 import com.aivle.bookapp.exception.InvalidCredentialsException;
+import com.aivle.bookapp.exception.UserNotFoundException;
 import com.aivle.bookapp.repository.UsersRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -57,7 +58,7 @@ public class AuthService {
         }
 
         if (!isMatched) {
-            throw new RuntimeException("Invalid email or password");
+            throw new InvalidCredentialsException();
         }
 
         String token = jwtTokenProvider.createToken(user.getEmail());
@@ -75,7 +76,7 @@ public class AuthService {
     @Transactional
     public User updateProfile(String email, com.aivle.bookapp.dto.UpdateProfileRequest request) {
         User user = usersRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new UserNotFoundException(email));
 
         System.out.println("[DEBUG] email: " + email);
         System.out.println("[DEBUG] request name: " + request.getName());
