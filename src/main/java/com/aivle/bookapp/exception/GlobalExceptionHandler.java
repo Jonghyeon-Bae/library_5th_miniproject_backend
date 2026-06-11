@@ -63,4 +63,9 @@ public class GlobalExceptionHandler {
         Map<String, String> body = Map.of("error", "Bad Request", "message", ex.getMessage());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
     }
+    // 권한 없음 (403 Forbidden)
+    @ExceptionHandler(UnauthorizedAccessException.class)
+    public ResponseEntity<Map<String, String>> handleUnauthorizedAccess(UnauthorizedAccessException ex) {
+        return buildResponse(HttpStatus.FORBIDDEN, "Forbidden", ex.getMessage());
+    }
 }
