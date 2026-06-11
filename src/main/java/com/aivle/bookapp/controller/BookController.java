@@ -37,8 +37,9 @@ public class BookController {
 
     //[소한민] Response Entity 사용하여 명시적인 200 OK 반환/ 응답규격 통일
     @GetMapping("/{id}")
-    public ResponseEntity<Book> getBook(@PathVariable("id") Long id){
-        return ResponseEntity.ok(bookService.findById(id));
+    //단건 조회 응답 DTO로 통일
+    public ResponseEntity<BookResponseDto> getBook(@PathVariable("id") Long id){
+        return ResponseEntity.ok(new BookResponseDto(bookService.findById(id)));
     }
 
     // ISBN 중복 확인 API
@@ -130,10 +131,14 @@ public class BookController {
 //    }
 
     // [소한민] 신규 도서 등록 Location header 및 body 반영
+    //bookService에서 수정한 메서드 형식에 맞추어 등록/수정/삭제 업데이트
     @PostMapping
-    public ResponseEntity<Map<String, Object>> createBook(@Valid @RequestBody Book book) {
-        Book saved = bookService.createBook(book);
-
+    public ResponseEntity<Map<String, Object>> createBook(
+            @Valid @RequestBody BookCreateRequestDto requestDto,
+            @AuthenticationPrincipal UserDetails userDetails)
+    {
+        String userEmail = userDetails.getUsername();
+        Book saved = bookService.createBook(requestDto, userEmail);
         // Location 헤더 생성
         URI location = ServletUriComponentsBuilder.fromCurrentRequest()
                 .path("/{id}")
@@ -150,15 +155,19 @@ public class BookController {
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<Book> updateBook(@PathVariable("id") Long id, @RequestBody Map<String, Object> payload) {
+    public ResponseEntity<BookResponseDto> updateBook(@PathVariable("id") Long id, @RequestBody Map<String, Object> payload) {
         Book updated = bookService.updateBook(id, payload);
-        return ResponseEntity.ok(updated);
+        return ResponseEntity.ok(new BookResponseDto(updated));
     }
 
     // [소한민] 삭제 성공 시 본문이 없는 204 No Content 반환 (REST 표준 준수)
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteBook(@PathVariable("id") Long id) {
-        bookService.deleteBook(id);
+    public ResponseEntity<Void> deleteBook(
+            @PathVariable("id") Long id,
+            @AuthenticationPrincipal UserDetails userDetails)
+    {
+        String userEmail = userDetails.getUsername();
+        bookService.deleteBook(id,userEmail);
         return ResponseEntity.noContent().build();
     }
 
@@ -166,10 +175,12 @@ public class BookController {
     @PatchMapping("/{id}/cover")
     public ResponseEntity<Map<String, Object>> updateBookCover(
             @PathVariable("id") Long id,
-            @RequestBody Map<String, String> request) {
-
+            @RequestBody Map<String, String> request,
+            @AuthenticationPrincipal UserDetails userDetails)
+    {
+        String userEmail = userDetails.getUsername();
         String coverDataUrl = request.get("coverDataUrl");
-        Book updated = bookService.updateCover(id, coverDataUrl);
+        Book updated = bookService.updateCover(id, coverDataUrl,userEmail);
 
         return ResponseEntity.ok(Map.of("id", updated.getId(), "thumbnail", updated.getThumbnail()));
     }
