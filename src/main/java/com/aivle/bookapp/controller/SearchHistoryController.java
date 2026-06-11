@@ -33,10 +33,20 @@ public class SearchHistoryController {
         return ResponseEntity.ok(new SearchHistoryResponseDto(history));
     }
 
-    // 특정 사용자의 검색 기록 전체 삭제 (추가B-2)
+    // 특정 사용자의 검색 기록 전체 삭제
     @DeleteMapping
     public ResponseEntity<String> deleteAllHistories(@RequestParam("userId") Long userId) {
          long deletedCount = searchHistoryService.deleteAllHistory(userId);
         return ResponseEntity.ok("사용자 검색 기록 전체 삭제 완료 : " + deletedCount + "개 삭제");
+    }
+
+    // 특정 사용자의 특정 검색 기록 삭제 (B3)
+    @DeleteMapping("/keyword")
+    public ResponseEntity<String> deleteHistory(
+            @RequestParam("userId") Long userId,
+            @RequestParam("keyword") String keyword
+    ) {
+        searchHistoryService.deleteHistory(userId, keyword);
+        return ResponseEntity.ok("사용자 검색 기록 " + keyword + " 삭제 완료");
     }
 }
